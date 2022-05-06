@@ -1,8 +1,7 @@
 package com.ancun.chain_storage.service_blockchain;
 
-import com.ancun.chain_storage.contracts.Evidence;
+import com.ancun.chain_storage.contracts.*;
 import com.ancun.chain_storage.service_blockchain.impl.ContractNotExistException;
-import com.ancun.chain_storage.contracts.NFT;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 
 import java.math.BigInteger;
@@ -29,4 +28,12 @@ public interface BlockchainService {
     String getTransactionByHash(String hash);
 
     Map<String, String> deployCSContracts(CryptoKeyPair keyPair) throws Exception;
+    ChainStorage loadChainStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    Setting loadSettingContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
+    History loadHistoryContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException;
 }

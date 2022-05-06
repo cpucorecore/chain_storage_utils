@@ -287,6 +287,96 @@ public class BlockchainServiceImpl implements BlockchainService {
         return contractAddrs;
     }
 
+    public ChainStorage loadChainStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        ChainStorage chainStorage = ChainStorage.load(contractAddress, client, keyPair);
+        return chainStorage;
+    }
+
+    public Setting loadSettingContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        Setting setting = Setting.load(contractAddress, client, keyPair);
+        try {
+            String admin = setting.getAdmin();
+            logger.debug("Setting.getAdmin():{}", admin);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return setting;
+    }
+
+    public Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        Node node = Node.load(contractAddress, client, keyPair);
+        try {
+            Boolean exist = node.exist(contractAddress);
+            logger.debug("Node.exist():{}", exist);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return node;
+    }
+
+    public File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        File file = File.load(contractAddress, client, keyPair);
+        try {
+            Boolean exist = file.exist(contractAddress);
+            logger.debug("File.exist():{}", exist);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return file;
+    }
+
+    public User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        User user = User.load(contractAddress, client, keyPair);
+        try {
+            Boolean exist = user.exist(contractAddress);
+            logger.debug("User.exist():{}", exist);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return user;
+    }
+
+    public Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        Task task = Task.load(contractAddress, client, keyPair);
+        try {
+            Boolean exist = task.exist(BigInteger.valueOf(1));
+            logger.debug("Task.exist():{}", exist);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return task;
+    }
+
+    public Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        Monitor monitor = Monitor.load(contractAddress, client, keyPair);
+        try {
+            Boolean exist = monitor.exist(contractAddress);
+            logger.debug("File.exist():{}", exist);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return monitor;
+    }
+
+    public History loadHistoryContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+        sdkClientInstance();
+        History history = History.load(contractAddress, client, keyPair);
+        try {
+            BigInteger userHistoryNumber = history.getUserHistoryNumber();
+            logger.debug("History.getUserHistoryNumber():{}", userHistoryNumber);
+        } catch (ContractException e) {
+            throw new ContractNotExistException(contractAddress);
+        }
+        return history;
+    }
+
     public NFT loadNFTContract(CryptoKeyPair keyPair, String contractAddress)
             throws ContractNotExistException {
         sdkClientInstance();
