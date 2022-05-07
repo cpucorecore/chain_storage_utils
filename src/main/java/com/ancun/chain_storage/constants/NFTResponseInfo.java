@@ -27,6 +27,12 @@ public enum NFTResponseInfo {
     DOWNLOAD_FILE_ERR(5000, "download NFT image by http failed"),
     UPLOAD_FILE_ERR(5001, "upload NFT image to ipfs failed"),
     UPLOAD_METADATA_ERR(5002, "upload NFT metadata to ipfs failed"),
+
+    CS_Setting_Unknown_key(10001, "unknown setting key"),
+    CS_Read_Contract_Exception(11002, "read contract exception"),
+    CS_Write_Contract_Exception(11003, "write contract exception"),
+
+    CS_Invalid_Resolver_Address_Exception(12001, "invalid resolver address, it must be set"),
     ;
 
     private int code;

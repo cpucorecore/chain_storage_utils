@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.math.BigInteger;
 import java.util.Map;
 
 import static com.ancun.chain_storage.requests.RequestUtils.parseChainAccountInfo;
@@ -52,6 +51,20 @@ public class ChainStorageController {
             warp.resp.setData(e.getMessage());
         }
         return warp.resp;
+    }
+
+    @PutMapping("resolver/{address}")
+    public RespBody<String> setResolver(@PathVariable(value = "address") String address) {
+        RespBody<String> response = new RespBody<>(NFTResponseInfo.SUCCESS);
+        blockchainService.setResolverAddress(address);
+        return response;
+    }
+
+    @GetMapping("resolver")
+    public RespBody<String> getResolver() {
+        RespBody<String> response = new RespBody<>(NFTResponseInfo.SUCCESS);
+        response.setData(blockchainService.getResolverAddress());
+        return response;
     }
 
     private KeyPairWrap prepareKeyPair(String chainAccountInfo) {
