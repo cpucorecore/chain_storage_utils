@@ -48,7 +48,7 @@ public interface BlockchainService {
     Node loadNodeContract(CryptoKeyPair keyPair) throws ContractException;
     File loadFileContract(CryptoKeyPair keyPair) throws ContractException;
     User loadUserContract(CryptoKeyPair keyPair) throws ContractException;
-    Task loadTaskContract(CryptoKeyPair keyPair) throws ContractException;
+    Task loadTaskContract() throws ContractException;
     Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractException;
     History loadHistoryContract(CryptoKeyPair keyPair) throws ContractException;
     Node loadNodeContract() throws ContractException;

@@ -2,3 +2,5 @@
 target
 src/main/resources/conf
 account
+src/main/resources
+config.toml

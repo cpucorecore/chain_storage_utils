@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import static com.ancun.chain_storage.constants.NFTResponseInfo.*;
 
@@ -81,6 +82,33 @@ public class NodeController {
         }
 
         resp.setData(status.toString());
+        return resp;
+    }
+
+    @GetMapping("get_node_cids/{address}")
+    public RespBody<String> handleGetNodeCids(@PathVariable(value = "address") String address) {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        List<String> cids = null;
+        try {
+            cids = node.getNodeCids(address);
+        } catch (ContractException e) {
+            logger.warn("node.getNodeCids({}) exception:{}", address, e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(cids.toString());
         return resp;
     }
 }
