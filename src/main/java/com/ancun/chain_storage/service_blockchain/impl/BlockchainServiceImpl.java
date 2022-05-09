@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     private static final Logger logger = LoggerFactory.getLogger(BlockchainServiceImpl.class);
 
-    @Autowired
+    @Resource
     private FileConfig fileConfig;
 
     @Value("${chain.groupId}")
@@ -59,7 +60,11 @@ public class BlockchainServiceImpl implements BlockchainService {
     private void sdkClientInstance() {
         String path = fileConfig.getConfigFile();
         if (null == sdk) {
-            sdk = BcosSDK.build(path);
+            try {
+                sdk = BcosSDK.build(path);
+            } catch (Exception e) {
+                sdk = BcosSDK.build(path);
+            }
         }
         if (null == client) {
             client = sdk.getClient(groupId);
