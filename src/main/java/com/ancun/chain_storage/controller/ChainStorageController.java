@@ -2,12 +2,16 @@ package com.ancun.chain_storage.controller;
 
 import com.ancun.chain_storage.constants.ChainStorageResponseInfo;
 import com.ancun.chain_storage.constants.NFTResponseInfo;
+import com.ancun.chain_storage.contracts.ChainStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.requests.ChainAccountInfo;
 import com.ancun.chain_storage.requests.DeployCSContractRequest;
+import com.ancun.chain_storage.requests.NodeRegisterRequest;
 import com.ancun.chain_storage.service_account.AccountService;
 import com.ancun.chain_storage.service_account.impl.ChainAccount;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import java.util.Map;
 
+import static com.ancun.chain_storage.constants.NFTResponseInfo.INVALID_ACCOUNT;
+import static com.ancun.chain_storage.constants.NFTResponseInfo.INVALID_REQUEST;
+import static com.ancun.chain_storage.requests.RequestUtils.keyAddress;
 import static com.ancun.chain_storage.requests.RequestUtils.parseChainAccountInfo;
 
 @RestController
@@ -67,6 +74,39 @@ public class ChainStorageController {
         return response;
     }
 
+    @PostMapping("node_register")
+    public RespBody<String> handleNodeRegister(@RequestHeader String chainAccountInfo, @RequestBody NodeRegisterRequest request) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        if (false == request.check()) {
+            wrap.resp.setNFTResponseInfo(INVALID_REQUEST);
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            logger.warn("loadChainStorageContract exception:{}", e.getMessage());
+            wrap.resp.setData("loadChainStorageContract exception:" + e.getMessage());
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
+        if (!receipt.isStatusOK()) {
+            logger.warn("nodeRegister failed:{}", receipt.getStatusMsg());
+            wrap.resp.setData("nodeRegister failed:" + receipt.getStatusMsg());
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
     private KeyPairWrap prepareKeyPair(String chainAccountInfo) {
         RespBody<String> resp = new RespBody<>(NFTResponseInfo.SUCCESS);
         KeyPairWrap keyPairWrap = new KeyPairWrap(null, resp);
@@ -75,7 +115,7 @@ public class ChainStorageController {
         try {
             accountInfo = parseChainAccountInfo(chainAccountInfo);
         } catch (Exception e) {
-            resp.setNFTResponseInfo(NFTResponseInfo.INVALID_ACCOUNT);
+            resp.setNFTResponseInfo(INVALID_ACCOUNT);
             resp.setData(e.getMessage());
             logger.error(resp.toString());
             return keyPairWrap;

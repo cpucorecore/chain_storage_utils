@@ -2,6 +2,7 @@ package com.ancun.chain_storage.constants;
 
 public enum ChainStorageResponseInfo {
     SUCCESS(0, "成功"),
+    INVALID_ACCOUNT(100, "invalid account"),
     INVALID_REQUEST(1000, "invalid request");
 
     private int code;
