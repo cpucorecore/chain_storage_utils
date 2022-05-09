@@ -51,4 +51,6 @@ public interface BlockchainService {
     Task loadTaskContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException;
     Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException;
     History loadHistoryContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException;
+
+    Node loadRONodeContract() throws ContractNotExistException, ContractException, InvalidResolverAddressException;
 }

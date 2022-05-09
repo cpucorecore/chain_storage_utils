@@ -528,4 +528,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         String address = getContractAddress(CN_History);
         return loadHistoryContract(keyPair, address);
     }
+
+    public Node loadRONodeContract() throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+        String address = getContractAddress(CN_Node);
+        return loadNodeContract(keyPairForRead, address);
+    }
 }
