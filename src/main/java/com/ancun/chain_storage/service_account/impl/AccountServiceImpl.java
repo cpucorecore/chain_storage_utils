@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 
 @Service
@@ -114,6 +115,7 @@ public class AccountServiceImpl implements AccountService {
             dir.mkdirs();
         }
         Files.write(path, keyStore.getData());
+        logger.info(Thread.currentThread().toString());
         cryptoSuite.loadAccount("p12", keyStoreFilePath, keyStore.getPassword());
         return new ChainAccount(keyStore, cryptoSuite.getCryptoKeyPair());
     }

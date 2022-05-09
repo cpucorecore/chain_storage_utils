@@ -4,4 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface KeyStoreRepository extends JpaRepository<KeyStoreEntity, Long> {
     KeyStoreEntity findByAddress(String address);
+    Boolean existsByAddress(String address);
 }

@@ -4,4 +4,6 @@ public interface KeyStoreService {
     void saveKeyStore(KeyStoreEntity keyStore);
 
     KeyStoreEntity loadKeyStore(String address);
+
+    Boolean exists(String address);
 }

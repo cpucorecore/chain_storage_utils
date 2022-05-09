@@ -16,4 +16,9 @@ public class MysqlKeyStoreService implements KeyStoreService {
     public KeyStoreEntity loadKeyStore(String address) {
         return keyStoreRepository.findByAddress(address);
     }
+
+    @Override
+    public Boolean exists(String address) {
+        return keyStoreRepository.existsByAddress(address);
+    }
 }

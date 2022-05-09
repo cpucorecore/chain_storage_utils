@@ -36,6 +36,11 @@ public class RespBody<T> {
         this.msg = info.getMsg();
     }
 
+    public void setResponseInfo(ChainStorageResponseInfo info) {
+        this.code = info.getCode();
+        this.msg = info.getMsg();
+    }
+
     public RespBody(int code, String msg, T data) {
         this(code, msg);
         this.data = data;
