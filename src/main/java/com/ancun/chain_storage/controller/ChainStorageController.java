@@ -7,6 +7,7 @@ import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.requests.ChainAccountInfo;
 import com.ancun.chain_storage.requests.DeployCSContractRequest;
 import com.ancun.chain_storage.requests.NodeRegisterRequest;
+import com.ancun.chain_storage.requests.UserAddFileRequest;
 import com.ancun.chain_storage.service_account.AccountService;
 import com.ancun.chain_storage.service_account.impl.ChainAccount;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
@@ -23,8 +24,6 @@ import java.util.Map;
 import static com.ancun.chain_storage.constants.ChainStorageResponseInfo.CALL_CONTRACT_EXCEPTION;
 import static com.ancun.chain_storage.constants.ChainStorageResponseInfo.LOAD_CONTRACT_EXCEPTION;
 import static com.ancun.chain_storage.constants.NFTResponseInfo.INVALID_ACCOUNT;
-import static com.ancun.chain_storage.constants.NFTResponseInfo.INVALID_REQUEST;
-import static com.ancun.chain_storage.requests.RequestUtils.keyAddress;
 import static com.ancun.chain_storage.requests.RequestUtils.parseChainAccountInfo;
 
 @RestController
@@ -232,6 +231,103 @@ public class ChainStorageController {
         TransactionReceipt receipt = chainStorage.nodeFinishTask(tid);
         if (!receipt.isStatusOK()) {
             String msg = "nodeFinishTask failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    // User
+    @PostMapping("user_register/{ext}")
+    public RespBody<String> handleUserRegister(@RequestHeader String chainAccountInfo, @PathVariable(value = "ext") String ext) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.userRegister(ext);
+        if (!receipt.isStatusOK()) {
+            String msg = "userRegister failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    @PostMapping("user_add_file")
+    public RespBody<String> handleUserAddFile(@RequestHeader String chainAccountInfo, @RequestBody UserAddFileRequest request) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.userAddFile(request.getCid(), request.getSize(), request.getDuration(), request.getExt());
+        if (!receipt.isStatusOK()) {
+            String msg = "userAddFile failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    @PostMapping("user_delete_file/{cid}")
+    public RespBody<String> handleUserDeleteFile(@RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
+        if (!receipt.isStatusOK()) {
+            String msg = "userDeleteFile failed:" + receipt.getStatusMsg();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
