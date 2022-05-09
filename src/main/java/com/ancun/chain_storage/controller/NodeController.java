@@ -28,36 +28,30 @@ public class NodeController {
     @Resource
     private BlockchainService blockchainService;
 
-    @Resource
-    private AccountService accountService;
-
-    @GetMapping("exist/{addr}")
-    public RespBody<String> exist(@PathVariable(value = "addr") String addr) {
+    @GetMapping("exist/{address}")
+    public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         Node node = null;
         try {
-            node = blockchainService.loadRONodeContract();
-        } catch (ContractNotExistException e) {
-            resp.setNFTResponseInfo(CONTRACT_NOT_EXIST);
-            return resp;
+            node = blockchainService.loadNodeContract();
         } catch (ContractException e) {
-            resp.setNFTResponseInfo(CS_Read_Contract_Exception);
-            return resp;
-        }
-        catch (InvalidResolverAddressException e) {
-            resp.setNFTResponseInfo(CS_Invalid_Resolver_Address_Exception);
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
             return resp;
         }
 
-        Boolean v = false;
+        Boolean exist = false;
         try {
-            v = node.exist(addr);
+            exist = node.exist(address);
         } catch (ContractException e) {
-            resp.setNFTResponseInfo(CS_Read_Contract_Exception);
+            logger.warn("node.exist({}) exception:{}", address, e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(v.toString());
+        resp.setData(exist.toString());
         return resp;
     }
 }

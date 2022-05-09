@@ -330,31 +330,28 @@ public class BlockchainServiceImpl implements BlockchainService {
         return resolverAddress;
     }
 
-    public String getContractAddress(String contractName) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
-        Resolver resolver = loadResolverContract(keyPairForRead);
+    public String getContractAddress(String contractName) throws ContractException {
+        Resolver resolver = loadResolverContract();
         String address = resolver.getAddress(contractNames.get(contractName));
         logger.debug("resolver.getAddress(\"{}\"):{}", contractName, address);
         return address;
     }
 
-    public Resolver loadResolverContract(CryptoKeyPair keyPair) throws ContractNotExistException, InvalidResolverAddressException {
+    public Resolver loadResolverContract() throws ContractException {
         sdkClientInstance();
+
         if(null == resolverAddress || "".equals(resolverAddress)) {
-            throw new InvalidResolverAddressException(resolverAddress);
+            throw new ContractException("invalid resolver address");
         }
 
-        Resolver resolver = Resolver.load(resolverAddress, client, keyPair);
-        try {
-            String chainStorageAddress = resolver.getAddress(ChainStorageBytes32);
-            logger.debug("Resolver.getAddress(\"ChainStorage\"):{}", chainStorageAddress);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(resolverAddress);
-        }
+        Resolver resolver = Resolver.load(resolverAddress, client, keyPairForRead);
+        String chainStorageAddress = resolver.getAddress(ChainStorageBytes32);
+        logger.debug("loadResolverContract() try: Resolver.getAddress(\"ChainStorage\"):{}", chainStorageAddress);
         return resolver;
     }
-    public Resolver loadResolverContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException, InvalidResolverAddressException {
+    public Resolver loadResolverContract(String contractAddress) throws ContractException {
         setResolverAddress(contractAddress);
-        return loadResolverContract(keyPair);
+        return loadResolverContract();
     }
 
     public ChainStorage loadChainStorageContract(CryptoKeyPair keyPair, String contractAddress) {
@@ -363,87 +360,59 @@ public class BlockchainServiceImpl implements BlockchainService {
         return chainStorage;
     }
 
-    public Setting loadSettingContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public Setting loadSettingContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         Setting setting = Setting.load(contractAddress, client, keyPair);
-        try {
-            String admin = setting.getAdmin();
-            logger.debug("Setting.getAdmin():{}", admin);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        String admin = setting.getAdmin();
+        logger.debug("Setting.getAdmin():{}", admin);
         return setting;
     }
 
-    public Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         Node node = Node.load(contractAddress, client, keyPair);
-        try {
-            Boolean exist = node.exist(contractAddress);
-            logger.debug("Node.exist():{}", exist);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        Boolean exist = node.exist(contractAddress);
+        logger.debug("Node.exist():{}", exist);
         return node;
     }
 
-    public File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         File file = File.load(contractAddress, client, keyPair);
-        try {
-            Boolean exist = file.exist(contractAddress);
-            logger.debug("File.exist():{}", exist);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        Boolean exist = file.exist(contractAddress);
+        logger.debug("File.exist():{}", exist);
         return file;
     }
 
-    public User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         User user = User.load(contractAddress, client, keyPair);
-        try {
-            Boolean exist = user.exist(contractAddress);
-            logger.debug("User.exist():{}", exist);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        Boolean exist = user.exist(contractAddress);
+        logger.debug("User.exist():{}", exist);
         return user;
     }
 
-    public Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         Task task = Task.load(contractAddress, client, keyPair);
-        try {
-            Boolean exist = task.exist(BigInteger.valueOf(1));
-            logger.debug("Task.exist():{}", exist);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        Boolean exist = task.exist(BigInteger.valueOf(1));
+        logger.debug("Task.exist():{}", exist);
         return task;
     }
 
-    public Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         Monitor monitor = Monitor.load(contractAddress, client, keyPair);
-        try {
-            Boolean exist = monitor.exist(contractAddress);
-            logger.debug("File.exist():{}", exist);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        Boolean exist = monitor.exist(contractAddress);
+        logger.debug("File.exist():{}", exist);
         return monitor;
     }
 
-    public History loadHistoryContract(CryptoKeyPair keyPair, String contractAddress) throws ContractNotExistException {
+    public History loadHistoryContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         History history = History.load(contractAddress, client, keyPair);
-        try {
-            BigInteger userHistoryNumber = history.getUserHistoryNumber();
-            logger.debug("History.getUserHistoryNumber():{}", userHistoryNumber);
-        } catch (ContractException e) {
-            throw new ContractNotExistException(contractAddress);
-        }
+        BigInteger userHistoryNumber = history.getUserHistoryNumber();
+        logger.debug("History.getUserHistoryNumber():{}", userHistoryNumber);
         return history;
     }
 
@@ -489,47 +458,47 @@ public class BlockchainServiceImpl implements BlockchainService {
         return client.getTransactionByHash(hash).getResult().toString();
     }
 
-    public ChainStorage loadChainStorageContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public ChainStorage loadChainStorageContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_ChainStorage);
         return loadChainStorageContract(keyPair, address);
     }
 
-    public Setting loadSettingContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public Setting loadSettingContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_Setting);
         return loadSettingContract(keyPair, address);
     }
 
-    public Node loadNodeContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public Node loadNodeContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_Node);
         return loadNodeContract(keyPair, address);
     }
 
-    public File loadFileContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public File loadFileContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_File);
         return loadFileContract(keyPair, address);
     }
 
-    public User loadUserContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public User loadUserContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_User);
         return loadUserContract(keyPair, address);
     }
 
-    public Task loadTaskContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public Task loadTaskContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_Task);
         return loadTaskContract(keyPair, address);
     }
 
-    public Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_Monitor);
         return loadMonitorContract(keyPair, address);
     }
 
-    public History loadHistoryContract(CryptoKeyPair keyPair) throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public History loadHistoryContract(CryptoKeyPair keyPair) throws ContractException {
         String address = getContractAddress(CN_History);
         return loadHistoryContract(keyPair, address);
     }
 
-    public Node loadRONodeContract() throws ContractNotExistException, ContractException, InvalidResolverAddressException {
+    public Node loadNodeContract() throws ContractException {
         String address = getContractAddress(CN_Node);
         return loadNodeContract(keyPairForRead, address);
     }

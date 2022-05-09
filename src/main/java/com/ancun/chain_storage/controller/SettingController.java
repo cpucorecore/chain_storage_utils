@@ -61,15 +61,8 @@ public class SettingController {
         Setting setting = null;
         try {
             setting = blockchainService.loadSettingContract(wrap.keyPair);
-        } catch (ContractNotExistException e) {
-            wrap.resp.setNFTResponseInfo(CONTRACT_NOT_EXIST);
-            return wrap.resp;
         } catch (ContractException e) {
             wrap.resp.setNFTResponseInfo(CS_Read_Contract_Exception);
-            return wrap.resp;
-        }
-        catch (InvalidResolverAddressException e) {
-            wrap.resp.setNFTResponseInfo(CS_Invalid_Resolver_Address_Exception);
             return wrap.resp;
         }
 
@@ -143,14 +136,8 @@ public class SettingController {
         Setting setting = null;
         try {
             setting = blockchainService.loadSettingContract(wrap.keyPair);
-        } catch (ContractNotExistException e) {
-            wrap.resp.setNFTResponseInfo(CONTRACT_NOT_EXIST);
-            return wrap.resp;
         } catch (ContractException e) {
             wrap.resp.setNFTResponseInfo(CS_Read_Contract_Exception);
-            return wrap.resp;
-        } catch (InvalidResolverAddressException e) {
-            wrap.resp.setNFTResponseInfo(CS_Invalid_Resolver_Address_Exception);
             return wrap.resp;
         }
 

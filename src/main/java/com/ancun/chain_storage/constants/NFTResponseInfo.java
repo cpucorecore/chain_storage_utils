@@ -32,6 +32,8 @@ public enum NFTResponseInfo {
     CS_Read_Contract_Exception(11002, "read contract exception"),
     CS_Write_Contract_Exception(11003, "write contract exception"),
 
+    CONTRACT_EXCEPTION(13000, "contract exception"),
+
     CS_Invalid_Resolver_Address_Exception(12001, "invalid resolver address, it must be set"),
     ;
 
