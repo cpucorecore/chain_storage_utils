@@ -483,9 +483,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         return loadFileContract(keyPairForRead, address);
     }
 
-    public User loadUserContract(CryptoKeyPair keyPair) throws ContractException {
+    public User loadUserContract() throws ContractException {
         String address = getContractAddress(CN_User);
-        return loadUserContract(keyPair, address);
+        return loadUserContract(keyPairForRead, address);
     }
 
     public Task loadTaskContract() throws ContractException {
