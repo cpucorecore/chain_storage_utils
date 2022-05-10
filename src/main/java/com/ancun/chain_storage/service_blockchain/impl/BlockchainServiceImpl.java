@@ -478,9 +478,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         return loadNodeContract(keyPair, address);
     }
 
-    public File loadFileContract(CryptoKeyPair keyPair) throws ContractException {
+    public File loadFileContract() throws ContractException {
         String address = getContractAddress(CN_File);
-        return loadFileContract(keyPair, address);
+        return loadFileContract(keyPairForRead, address);
     }
 
     public User loadUserContract(CryptoKeyPair keyPair) throws ContractException {
