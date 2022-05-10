@@ -7,6 +7,8 @@ import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderInterface;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,7 @@ public class BlockchainServiceImpl implements BlockchainService {
     private BcosSDK sdk;
     private CryptoKeyPair keyPairForRead;
     private Map<String, byte[]> contractNames = new HashMap<>();
+    private TransactionDecoderInterface decoder;
 
     private void sdkClientInstance() {
         String path = fileConfig.getConfigFile();
@@ -81,6 +84,16 @@ public class BlockchainServiceImpl implements BlockchainService {
             contractNames.put(CN_Monitor, MonitorBytes32);
             contractNames.put(CN_History, HistoryBytes32);
         }
+        if (null == decoder) {
+            decoder = new TransactionDecoderService(client.getCryptoSuite());
+        }
+    }
+
+    public TransactionDecoderInterface getDecoder() {
+        if (null == decoder) {
+            sdkClientInstance();
+        }
+        return decoder;
     }
 
     public String deployNFTContract(
@@ -460,7 +473,13 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     public String getTransactionByHash(String hash) {
         sdkClientInstance();
-        return client.getTransactionByHash(hash).getResult().toString();
+        client.getTransactionReceipt(hash).getTransactionReceipt().get();
+        return client.getTransactionByHash(hash).getTransaction().toString();
+    }
+
+    public TransactionReceipt getTransactionReceipt(String hash) {
+        sdkClientInstance();
+        return client.getTransactionReceipt(hash).getTransactionReceipt().get();
     }
 
     public ChainStorage loadChainStorageContract(CryptoKeyPair keyPair) throws ContractException {

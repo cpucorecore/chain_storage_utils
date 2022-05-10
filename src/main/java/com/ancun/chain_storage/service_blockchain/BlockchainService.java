@@ -4,12 +4,15 @@ import com.ancun.chain_storage.contracts.*;
 import com.ancun.chain_storage.service_blockchain.impl.ContractNotExistException;
 import com.ancun.chain_storage.service_blockchain.impl.InvalidResolverAddressException;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderInterface;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 
 import java.math.BigInteger;
 import java.util.Map;
 
 public interface BlockchainService {
+    TransactionDecoderInterface getDecoder();
     String deployNFTContract(
             CryptoKeyPair keyPair,
             String name,
@@ -28,6 +31,7 @@ public interface BlockchainService {
             throws ContractNotExistException;
 
     String getTransactionByHash(String hash);
+    TransactionReceipt getTransactionReceipt(String hash);
 
     Map<String, String> deployCSContracts(CryptoKeyPair keyPair) throws Exception;
     void setResolverAddress(String address);

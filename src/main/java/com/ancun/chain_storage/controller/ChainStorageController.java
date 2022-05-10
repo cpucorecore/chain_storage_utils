@@ -12,6 +12,7 @@ import com.ancun.chain_storage.service_account.AccountService;
 import com.ancun.chain_storage.service_account.impl.ChainAccount;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +103,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
         if (!receipt.isStatusOK()) {
-            String msg = "nodeRegister failed:" + receipt.getStatusMsg();
+            String msg = "nodeRegister failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -134,7 +135,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeSetExt failed:" + receipt.getStatusMsg();
+            String msg = "nodeSetExt failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -166,7 +167,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeOnline();
         if (!receipt.isStatusOK()) {
-            String msg = "nodeOnline failed:" + receipt.getStatusMsg();
+            String msg = "nodeOnline failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -198,7 +199,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeMaintain();
         if (!receipt.isStatusOK()) {
-            String msg = "nodeMaintain failed:" + receipt.getStatusMsg();
+            String msg = "nodeMaintain failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -230,7 +231,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeAcceptTask(tid);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeAcceptTask failed:" + receipt.getStatusMsg();
+            String msg = "nodeAcceptTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -262,7 +263,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeFinishTask(tid);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeFinishTask failed:" + receipt.getStatusMsg();
+            String msg = "nodeFinishTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -294,7 +295,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.nodeFailTask(tid);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeFailTask failed:" + receipt.getStatusMsg();
+            String msg = "nodeFailTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -326,7 +327,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.changeNodeSpace(space);
         if (!receipt.isStatusOK()) {
-            String msg = "changeNodeSpace failed:" + receipt.getStatusMsg();
+            String msg = "changeNodeSpace failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -359,7 +360,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.userRegister(ext);
         if (!receipt.isStatusOK()) {
-            String msg = "userRegister failed:" + receipt.getStatusMsg();
+            String msg = "userRegister failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -391,7 +392,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.userAddFile(request.getCid(), request.getSize(), request.getDuration(), request.getExt());
         if (!receipt.isStatusOK()) {
-            String msg = "userAddFile failed:" + receipt.getStatusMsg();
+            String msg = "userAddFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -423,7 +424,7 @@ public class ChainStorageController {
 
         TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
         if (!receipt.isStatusOK()) {
-            String msg = "userDeleteFile failed:" + receipt.getStatusMsg();
+            String msg = "userDeleteFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -432,6 +433,14 @@ public class ChainStorageController {
 
         wrap.resp.setData(receipt.toString());
         return wrap.resp;
+    }
+
+    @GetMapping("get_receipt_return_message/{txHash}")
+    public RespBody<String> handleParseReceiptMessage(@PathVariable(value = "txHash") String txHash) {
+        RespBody<String> resp = new RespBody<>(NFTResponseInfo.SUCCESS);
+        String msg = getReceiptReturnMessage(blockchainService.getTransactionReceipt(txHash));
+        resp.setData(msg);
+        return resp;
     }
 
     private KeyPairWrap prepareKeyPair(String chainAccountInfo) {
@@ -463,5 +472,10 @@ public class ChainStorageController {
 
         keyPairWrap.keyPair = chainAccount.getCryptoKeyPair();
         return keyPairWrap;
+    }
+
+    private String getReceiptReturnMessage(TransactionReceipt receipt) {
+        TransactionResponse transactionResponse = blockchainService.getDecoder().decodeReceiptStatus(receipt);
+        return transactionResponse.getReturnMessage();
     }
 }
