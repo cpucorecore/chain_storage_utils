@@ -113,6 +113,38 @@ public class ChainStorageController {
         return wrap.resp;
     }
 
+    @PostMapping("node_set_ext/{ext}")
+    public RespBody<String> handleNodeSetExt(@RequestHeader String chainAccountInfo, @PathVariable(value = "ext") String ext) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
+        if (!receipt.isStatusOK()) {
+            String msg = "nodeSetExt failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
     @PostMapping("node_online")
     public RespBody<String> handleNodeOnline(@RequestHeader String chainAccountInfo) {
         KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
@@ -231,6 +263,70 @@ public class ChainStorageController {
         TransactionReceipt receipt = chainStorage.nodeFinishTask(tid);
         if (!receipt.isStatusOK()) {
             String msg = "nodeFinishTask failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    @PostMapping("node_fail_task/{tid}")
+    public RespBody<String> handleNodeFailTask(@RequestHeader String chainAccountInfo, @PathVariable(value = "tid") BigInteger tid) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.nodeFailTask(tid);
+        if (!receipt.isStatusOK()) {
+            String msg = "nodeFailTask failed:" + receipt.getStatusMsg();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    @PostMapping("node_change_node_space/{space}")
+    public RespBody<String> handleNodeChangeNodeSpace(@RequestHeader String chainAccountInfo, @PathVariable(value = "space") BigInteger space) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.changeNodeSpace(space);
+        if (!receipt.isStatusOK()) {
+            String msg = "changeNodeSpace failed:" + receipt.getStatusMsg();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);

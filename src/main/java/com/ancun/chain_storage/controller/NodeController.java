@@ -1,19 +1,13 @@
 package com.ancun.chain_storage.controller;
 
 import com.ancun.chain_storage.contracts.Node;
-import com.ancun.chain_storage.contracts.Setting;
 import com.ancun.chain_storage.model.RespBody;
-import com.ancun.chain_storage.service_account.AccountService;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
-import com.ancun.chain_storage.service_blockchain.impl.ContractNotExistException;
-import com.ancun.chain_storage.service_blockchain.impl.InvalidResolverAddressException;
+import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 
@@ -58,7 +52,7 @@ public class NodeController {
         return resp;
     }
 
-    @GetMapping("status/{address}")
+    @GetMapping("get_status/{address}")
     public RespBody<String> handleGetStatus(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         Node node = null;
@@ -109,6 +103,195 @@ public class NodeController {
         }
 
         resp.setData(cids.toString());
+        return resp;
+    }
+
+    @GetMapping("get_ext/{address}")
+    public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        String ext = null;
+        try {
+            ext = node.getExt(address);
+        } catch (ContractException e) {
+            logger.warn("node.getExt({}) exception:{}", address, e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(ext);
+        return resp;
+    }
+
+    @GetMapping("get_storage_space_info/{address}")
+    public RespBody<String> handleGetStorageSpaceInfo(@PathVariable(value = "address") String address) {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        Tuple2<BigInteger, BigInteger> spaceInfo;
+        try {
+            spaceInfo = node.getStorageSpaceInfo(address);
+        } catch (ContractException e) {
+            logger.warn("node.getStorageSpaceInfo({}) exception:{}", address, e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(spaceInfo.toString());
+        return resp;
+    }
+
+    @GetMapping("get_node_cids_number/{address}")
+    public RespBody<String> handleGetNodeCidsNumber(@PathVariable(value = "address") String address) {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        BigInteger number;
+        try {
+            number = node.getNodeCidsNumber(address);
+        } catch (ContractException e) {
+            logger.warn("node.getNodeCidsNumber({}) exception:{}", address, e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(number.toString());
+        return resp;
+    }
+
+    @GetMapping("get_total_node_number")
+    public RespBody<String> handleGetTotalNodeNumber() {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        BigInteger number;
+        try {
+            number = node.getTotalNodeNumber();
+        } catch (ContractException e) {
+            logger.warn("node.getNodeCidsNumber() exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(number.toString());
+        return resp;
+    }
+
+    @GetMapping("get_total_online_node_number")
+    public RespBody<String> handleGetTotalOnlineNodeNumber() {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        BigInteger number;
+        try {
+            number = node.getTotalOnlineNodeNumber();
+        } catch (ContractException e) {
+            logger.warn("node.getTotalOnlineNodeNumber() exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(number.toString());
+        return resp;
+    }
+
+    @GetMapping("get_all_node_addresses")
+    public RespBody<String> handleGetAllNodeAddresses() {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        List<String> addresses;
+        try {
+            addresses = node.getAllNodeAddresses();
+        } catch (ContractException e) {
+            logger.warn("node.getAllNodeAddresses() exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(addresses.toString());
+        return resp;
+    }
+
+    @GetMapping("get_all_online_node_addresses")
+    public RespBody<String> handleGetAllOnlineNodeAddresses() {
+        RespBody<String> resp = new RespBody<>(SUCCESS);
+        Node node = null;
+        try {
+            node = blockchainService.loadNodeContract();
+        } catch (ContractException e) {
+            logger.warn("loadNodeContract exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        List<String> addresses;
+        try {
+            addresses = node.getAllOnlineNodeAddresses();
+        } catch (ContractException e) {
+            logger.warn("node.getAllOnlineNodeAddresses() exception:{}", e.toString());
+            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
+            resp.setData(e.getMessage());
+            return resp;
+        }
+
+        resp.setData(addresses.toString());
         return resp;
     }
 }
