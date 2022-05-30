@@ -1,6 +1,6 @@
 package com.ancun.chain_storage.controller;
 
-import com.ancun.chain_storage.contracts.User;
+import com.ancun.chain_storage.contracts.UserStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
@@ -31,9 +31,9 @@ public class UserController {
     @GetMapping("exist/{address}")
     public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -43,9 +43,9 @@ public class UserController {
 
         Boolean exist = false;
         try {
-            exist = user.exist(address);
+            exist = userStorage.exist(address);
         } catch (ContractException e) {
-            logger.warn("user.exist({}) exception:{}", address, e.toString());
+            logger.warn("userStorage.exist({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -58,9 +58,9 @@ public class UserController {
     @GetMapping("get_ext/{address}")
     public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -70,9 +70,9 @@ public class UserController {
 
         String ext = null;
         try {
-            ext = user.getExt(address);
+            ext = userStorage.getExt(address);
         } catch (ContractException e) {
-            logger.warn("user.getExt({}) exception:{}", address, e.toString());
+            logger.warn("userStorage.getExt({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -85,9 +85,9 @@ public class UserController {
     @GetMapping("get_storage_used/{address}")
     public RespBody<String> handleGetStorageUsed(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -97,9 +97,9 @@ public class UserController {
 
         BigInteger used = null;
         try {
-            used = user.getStorageUsed(address);
+            used = userStorage.getStorageUsed(address);
         } catch (ContractException e) {
-            logger.warn("user.getStorageUsed({}) exception:{}", address, e.toString());
+            logger.warn("userStorage.getStorageUsed({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -112,9 +112,9 @@ public class UserController {
     @GetMapping("get_storage_total/{address}")
     public RespBody<String> handleGetStorageTotal(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -124,9 +124,9 @@ public class UserController {
 
         BigInteger used = null;
         try {
-            used = user.getStorageTotal(address);
+            used = userStorage.getStorageTotal(address);
         } catch (ContractException e) {
-            logger.warn("user.getStorageTotal({}) exception:{}", address, e.toString());
+            logger.warn("userStorage.getStorageTotal({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -139,9 +139,9 @@ public class UserController {
     @GetMapping("get_file_ext/{address}/{cid}")
     public RespBody<String> handleGetFileExt(@PathVariable(value = "address") String address, @PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -151,9 +151,9 @@ public class UserController {
 
         String ext = null;
         try {
-            ext = user.getFileExt(address, cid);
+            ext = userStorage.getFileExt(address, cid);
         } catch (ContractException e) {
-            logger.warn("user.getFileExt({}, {}) exception:{}", address, cid, e.toString());
+            logger.warn("userStorage.getFileExt({}, {}) exception:{}", address, cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -166,9 +166,9 @@ public class UserController {
     @GetMapping("get_file_duration/{address}/{cid}")
     public RespBody<String> handleGetFileDuration(@PathVariable(value = "address") String address, @PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -178,9 +178,9 @@ public class UserController {
 
         BigInteger duration = null;
         try {
-            duration = user.getFileDuration(address, cid);
+            duration = userStorage.getFileDuration(address, cid);
         } catch (ContractException e) {
-            logger.warn("user.getFileDuration({}, {}) exception:{}", address, cid, e.toString());
+            logger.warn("userStorage.getFileDuration({}, {}) exception:{}", address, cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -193,9 +193,9 @@ public class UserController {
     @GetMapping("get_total_user_number")
     public RespBody<String> handleGetTotalUserNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -205,9 +205,9 @@ public class UserController {
 
         BigInteger number;
         try {
-            number = user.getTotalUserNumber();
+            number = userStorage.getTotalUserNumber();
         } catch (ContractException e) {
-            logger.warn("user.getTotalUserNumber() exception:{}", e.toString());
+            logger.warn("userStorage.getTotalUserNumber() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -222,9 +222,9 @@ public class UserController {
                                           @PathVariable(value = "page_number") BigInteger pageNumber,
                                           @PathVariable(value = "page_size") BigInteger pageSize) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        User user = null;
+        UserStorage userStorage = null;
         try {
-            user = blockchainService.loadUserContract();
+            userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -234,9 +234,9 @@ public class UserController {
 
         Tuple2<List<String>, Boolean> cids;
         try {
-            cids = user.getCids(address, pageNumber, pageSize);
+            cids = userStorage.getCids(address, pageNumber, pageSize);
         } catch (ContractException e) {
-            logger.warn("user.getFileDuration({}, {}, {}) exception:{}", address, pageNumber.toString(), pageSize.toString(), e.toString());
+            logger.warn("userStorage.getFileDuration({}, {}, {}) exception:{}", address, pageNumber.toString(), pageSize.toString(), e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;

@@ -1,6 +1,6 @@
 package com.ancun.chain_storage.controller;
 
-import com.ancun.chain_storage.contracts.Node;
+import com.ancun.chain_storage.contracts.NodeStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
@@ -28,9 +28,9 @@ public class NodeController {
     @GetMapping("exist/{address}")
     public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -40,9 +40,9 @@ public class NodeController {
 
         Boolean exist = false;
         try {
-            exist = node.exist(address);
+            exist = nodeStorage.exist(address);
         } catch (ContractException e) {
-            logger.warn("node.exist({}) exception:{}", address, e.toString());
+            logger.warn("nodeStorage.exist({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -55,9 +55,9 @@ public class NodeController {
     @GetMapping("get_status/{address}")
     public RespBody<String> handleGetStatus(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -67,9 +67,9 @@ public class NodeController {
 
         BigInteger status;
         try {
-            status = node.getStatus(address);
+            status = nodeStorage.getStatus(address);
         } catch (ContractException e) {
-            logger.warn("node.getStatus({}) exception:{}", address, e.toString());
+            logger.warn("nodeStorage.getStatus({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -79,39 +79,12 @@ public class NodeController {
         return resp;
     }
 
-    @GetMapping("get_node_cids/{address}")
-    public RespBody<String> handleGetNodeCids(@PathVariable(value = "address") String address) {
-        RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
-        try {
-            node = blockchainService.loadNodeContract();
-        } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        List<String> cids = null;
-        try {
-            cids = node.getNodeCids(address);
-        } catch (ContractException e) {
-            logger.warn("node.getNodeCids({}) exception:{}", address, e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        resp.setData(cids.toString());
-        return resp;
-    }
-
     @GetMapping("get_ext/{address}")
     public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -121,9 +94,9 @@ public class NodeController {
 
         String ext = null;
         try {
-            ext = node.getExt(address);
+            ext = nodeStorage.getExt(address);
         } catch (ContractException e) {
-            logger.warn("node.getExt({}) exception:{}", address, e.toString());
+            logger.warn("nodeStorage.getExt({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -136,9 +109,9 @@ public class NodeController {
     @GetMapping("get_storage_space_info/{address}")
     public RespBody<String> handleGetStorageSpaceInfo(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -146,53 +119,29 @@ public class NodeController {
             return resp;
         }
 
-        Tuple2<BigInteger, BigInteger> spaceInfo;
+        BigInteger used;
+        BigInteger total;
         try {
-            spaceInfo = node.getStorageSpaceInfo(address);
+            used = nodeStorage.getStorageUsed(address);
+            total = nodeStorage.getStorageTotal(address);
         } catch (ContractException e) {
-            logger.warn("node.getStorageSpaceInfo({}) exception:{}", address, e.toString());
+            logger.warn("nodeStorage.getStorageSpaceInfo({}) exception:{}", address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(spaceInfo.toString());
-        return resp;
-    }
-
-    @GetMapping("get_node_cids_number/{address}")
-    public RespBody<String> handleGetNodeCidsNumber(@PathVariable(value = "address") String address) {
-        RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
-        try {
-            node = blockchainService.loadNodeContract();
-        } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        BigInteger number;
-        try {
-            number = node.getNodeCidsNumber(address);
-        } catch (ContractException e) {
-            logger.warn("node.getNodeCidsNumber({}) exception:{}", address, e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        resp.setData(number.toString());
+        Tuple2<BigInteger, BigInteger> result = new Tuple2<>(used, total);
+        resp.setData(result.toString());
         return resp;
     }
 
     @GetMapping("get_total_node_number")
     public RespBody<String> handleGetTotalNodeNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -202,9 +151,9 @@ public class NodeController {
 
         BigInteger number;
         try {
-            number = node.getTotalNodeNumber();
+            number = nodeStorage.getTotalNodeNumber();
         } catch (ContractException e) {
-            logger.warn("node.getNodeCidsNumber() exception:{}", e.toString());
+            logger.warn("nodeStorage.getTotalNodeNumber() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -217,9 +166,9 @@ public class NodeController {
     @GetMapping("get_total_online_node_number")
     public RespBody<String> handleGetTotalOnlineNodeNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -229,9 +178,9 @@ public class NodeController {
 
         BigInteger number;
         try {
-            number = node.getTotalOnlineNodeNumber();
+            number = nodeStorage.getTotalOnlineNodeNumber();
         } catch (ContractException e) {
-            logger.warn("node.getTotalOnlineNodeNumber() exception:{}", e.toString());
+            logger.warn("nodeStorage.getTotalOnlineNodeNumber() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -244,9 +193,9 @@ public class NodeController {
     @GetMapping("get_all_node_addresses")
     public RespBody<String> handleGetAllNodeAddresses() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -256,9 +205,9 @@ public class NodeController {
 
         List<String> addresses;
         try {
-            addresses = node.getAllNodeAddresses();
+            addresses = nodeStorage.getAllNodeAddresses();
         } catch (ContractException e) {
-            logger.warn("node.getAllNodeAddresses() exception:{}", e.toString());
+            logger.warn("nodeStorage.getAllNodeAddresses() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -271,9 +220,9 @@ public class NodeController {
     @GetMapping("get_all_online_node_addresses")
     public RespBody<String> handleGetAllOnlineNodeAddresses() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Node node = null;
+        NodeStorage nodeStorage = null;
         try {
-            node = blockchainService.loadNodeContract();
+            nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
             logger.warn("loadNodeContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -283,9 +232,9 @@ public class NodeController {
 
         List<String> addresses;
         try {
-            addresses = node.getAllOnlineNodeAddresses();
+            addresses = nodeStorage.getAllOnlineNodeAddresses();
         } catch (ContractException e) {
-            logger.warn("node.getAllOnlineNodeAddresses() exception:{}", e.toString());
+            logger.warn("nodeStorage.getAllOnlineNodeAddresses() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;

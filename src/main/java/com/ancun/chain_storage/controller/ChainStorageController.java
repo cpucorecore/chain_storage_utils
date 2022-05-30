@@ -242,8 +242,11 @@ public class ChainStorageController {
         return wrap.resp;
     }
 
-    @PostMapping("node_finish_task/{tid}")
-    public RespBody<String> handleNodeFinishTask(@RequestHeader String chainAccountInfo, @PathVariable(value = "tid") BigInteger tid) {
+    @PostMapping("node_finish_task/{tid}/{size}")
+    public RespBody<String> handleNodeFinishTask(
+            @RequestHeader String chainAccountInfo,
+            @PathVariable(value = "tid") BigInteger tid,
+            @PathVariable(value = "size") BigInteger size) {
         KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
         if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
             logger.error(wrap.resp.toString());
@@ -261,7 +264,7 @@ public class ChainStorageController {
             return wrap.resp;
         }
 
-        TransactionReceipt receipt = chainStorage.nodeFinishTask(tid);
+        TransactionReceipt receipt = chainStorage.nodeFinishTask(tid, size);
         if (!receipt.isStatusOK()) {
             String msg = "nodeFinishTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
@@ -325,7 +328,7 @@ public class ChainStorageController {
             return wrap.resp;
         }
 
-        TransactionReceipt receipt = chainStorage.changeNodeSpace(space);
+        TransactionReceipt receipt = chainStorage.nodeSetStorageTotal(space);
         if (!receipt.isStatusOK()) {
             String msg = "changeNodeSpace failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
@@ -390,7 +393,7 @@ public class ChainStorageController {
             return wrap.resp;
         }
 
-        TransactionReceipt receipt = chainStorage.userAddFile(request.getCid(), request.getSize(), request.getDuration(), request.getExt());
+        TransactionReceipt receipt = chainStorage.userAddFile(request.getCid(), request.getDuration(), request.getExt());
         if (!receipt.isStatusOK()) {
             String msg = "userAddFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);

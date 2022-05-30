@@ -2,6 +2,7 @@ package com.ancun.chain_storage.controller;
 
 import com.ancun.chain_storage.contracts.Node;
 import com.ancun.chain_storage.contracts.Task;
+import com.ancun.chain_storage.contracts.TaskStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple5;
@@ -42,7 +43,7 @@ public class TaskController {
             return resp;
         }
 
-        Tuple5<String, BigInteger, String, BigInteger, String> taskItem;
+        Tuple5<String, BigInteger, String, Boolean, String> taskItem;
         try {
             taskItem = task.getTask(tid);
         } catch (ContractException e) {
@@ -59,9 +60,9 @@ public class TaskController {
     @GetMapping("get_task_state/{tid}")
     public RespBody<String> handleGetTaskState(@PathVariable(value = "tid") BigInteger tid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        Task task = null;
+        TaskStorage taskStorage = null;
         try {
-            task = blockchainService.loadTaskContract();
+            taskStorage = blockchainService.loadTaskStorageContract();
         } catch (ContractException e) {
             logger.warn("loadTaskContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -71,9 +72,9 @@ public class TaskController {
 
         Tuple8<BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger, BigInteger> taskState;
         try {
-            taskState = task.getTaskState(tid);
+            taskState = taskStorage.getTaskState(tid);
         } catch (ContractException e) {
-            logger.warn("task.getTaskState({}) exception:{}", tid.toString(10), e.toString());
+            logger.warn("taskStorage.getTaskState({}) exception:{}", tid.toString(10), e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;

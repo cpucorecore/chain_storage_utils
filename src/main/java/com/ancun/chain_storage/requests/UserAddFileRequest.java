@@ -15,14 +15,6 @@ public class UserAddFileRequest implements Request {
         this.cid = cid;
     }
 
-    public BigInteger getSize() {
-        return size;
-    }
-
-    public void setSize(BigInteger size) {
-        this.size = size;
-    }
-
     public BigInteger getDuration() {
         return duration;
     }
@@ -42,7 +34,6 @@ public class UserAddFileRequest implements Request {
     public UserAddFileRequest() {
     }
 
-    private BigInteger size;
     private BigInteger duration;
     private String ext;
     @Override

@@ -1,7 +1,7 @@
 package com.ancun.chain_storage.controller;
 
 import com.ancun.chain_storage.contracts.File;
-import com.ancun.chain_storage.contracts.Node;
+import com.ancun.chain_storage.contracts.FileStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -27,11 +27,11 @@ public class FileController {
     @GetMapping("exist/{cid}")
     public RespBody<String> handleExist(@PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadFileContract exception:{}", e.toString());
+            logger.warn("loadFileStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -39,9 +39,9 @@ public class FileController {
 
         Boolean exist;
         try {
-            exist = file.exist(cid);
+            exist = fileStorage.exist(cid);
         } catch (ContractException e) {
-            logger.warn("file.exist({}) exception:{}", cid, e.toString());
+            logger.warn("fileStorage.exist({}) exception:{}", cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -78,12 +78,12 @@ public class FileController {
         return resp;
     }
 
-    @GetMapping("owner_exist/{cid}/{address}")
-    public RespBody<String> handleOwnerExist(@PathVariable(value = "cid") String cid, @PathVariable(value = "address") String address) {
+    @GetMapping("user_exist/{cid}/{address}")
+    public RespBody<String> handleUserExist(@PathVariable(value = "cid") String cid, @PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -91,26 +91,26 @@ public class FileController {
             return resp;
         }
 
-        Boolean ownerExist;
+        Boolean userExist;
         try {
-            ownerExist = file.ownerExist(cid, address);
+            userExist = fileStorage.userExist(cid, address);
         } catch (ContractException e) {
-            logger.warn("file.ownerExist({}, {}) exception:{}", cid, address, e.toString());
+            logger.warn("fileStorage.userExist({}, {}) exception:{}", cid, address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(ownerExist.toString());
+        resp.setData(userExist.toString());
         return resp;
     }
 
-    @GetMapping("get_owners/{cid}")
-    public RespBody<String> handleOwnerExist(@PathVariable(value = "cid") String cid) {
+    @GetMapping("get_users/{cid}")
+    public RespBody<String> handleUserExist(@PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -118,26 +118,26 @@ public class FileController {
             return resp;
         }
 
-        List<String> owners;
+        List<String> users;
         try {
-            owners = file.getOwners(cid);
+            users = fileStorage.getUsers(cid);
         } catch (ContractException e) {
-            logger.warn("file.ownerExist({}) exception:{}", cid, e.toString());
+            logger.warn("fileStorage.getUsers({}) exception:{}", cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(owners.toString());
+        resp.setData(users.toString());
         return resp;
     }
 
     @GetMapping("node_exist/{cid}/{address}")
     public RespBody<String> handleNodeExist(@PathVariable(value = "cid") String cid, @PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -147,9 +147,9 @@ public class FileController {
 
         Boolean nodeExist;
         try {
-            nodeExist = file.nodeExist(cid, address);
+            nodeExist = fileStorage.nodeExist(cid, address);
         } catch (ContractException e) {
-            logger.warn("file.nodeExist({}, {}) exception:{}", cid, address, e.toString());
+            logger.warn("fileStorage.nodeExist({}, {}) exception:{}", cid, address, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -189,9 +189,9 @@ public class FileController {
     @GetMapping("get_total_size")
     public RespBody<String> handleGetTotalSize() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -201,9 +201,9 @@ public class FileController {
 
         BigInteger totalSize;
         try {
-            totalSize = file.getTotalSize();
+            totalSize = fileStorage.getTotalSize();
         } catch (ContractException e) {
-            logger.warn("file.getTotalSize() exception:{}", e.toString());
+            logger.warn("fileStorage.getTotalSize() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -216,9 +216,9 @@ public class FileController {
     @GetMapping("get_total_file_number")
     public RespBody<String> handleGetTotalFileNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -228,9 +228,9 @@ public class FileController {
 
         BigInteger totalFileNumber;
         try {
-            totalFileNumber = file.getTotalFileNumber();
+            totalFileNumber = fileStorage.getTotalFileNumber();
         } catch (ContractException e) {
-            logger.warn("file.getTotalFileNumber() exception:{}", e.toString());
+            logger.warn("fileStorage.getTotalFileNumber() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
