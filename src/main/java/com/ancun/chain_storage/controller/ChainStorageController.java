@@ -146,8 +146,8 @@ public class ChainStorageController {
         return wrap.resp;
     }
 
-    @PostMapping("node_online")
-    public RespBody<String> handleNodeOnline(@RequestHeader String chainAccountInfo) {
+    @PostMapping("node_can_add_file/{cid}/{size}")
+    public RespBody<String> handleNodeCanAddFile(@RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid, @PathVariable(value = "size") BigInteger size) {
         KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
         if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
             logger.error(wrap.resp.toString());
@@ -165,9 +165,9 @@ public class ChainStorageController {
             return wrap.resp;
         }
 
-        TransactionReceipt receipt = chainStorage.nodeOnline();
+        TransactionReceipt receipt = chainStorage.nodeCanAddFile(cid, size);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeOnline failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
+            String msg = "nodeCanAddFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
@@ -178,75 +178,10 @@ public class ChainStorageController {
         return wrap.resp;
     }
 
-    @PostMapping("node_maintain")
-    public RespBody<String> handleNodeMaintain(@RequestHeader String chainAccountInfo) {
-        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
-            logger.error(wrap.resp.toString());
-            return wrap.resp;
-        }
-
-        ChainStorage chainStorage;
-        try {
-            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-        } catch (ContractException e) {
-            String msg = "loadChainStorageContract Exception:" + e.getMessage();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        TransactionReceipt receipt = chainStorage.nodeMaintain();
-        if (!receipt.isStatusOK()) {
-            String msg = "nodeMaintain failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        wrap.resp.setData(receipt.toString());
-        return wrap.resp;
-    }
-
-    @PostMapping("node_accept_task/{tid}")
-    public RespBody<String> handleNodeAcceptTask(@RequestHeader String chainAccountInfo, @PathVariable(value = "tid") BigInteger tid) {
-        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
-            logger.error(wrap.resp.toString());
-            return wrap.resp;
-        }
-
-        ChainStorage chainStorage;
-        try {
-            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-        } catch (ContractException e) {
-            String msg = "loadChainStorageContract Exception:" + e.getMessage();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        TransactionReceipt receipt = chainStorage.nodeAcceptTask(tid);
-        if (!receipt.isStatusOK()) {
-            String msg = "nodeAcceptTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        wrap.resp.setData(receipt.toString());
-        return wrap.resp;
-    }
-
-    @PostMapping("node_finish_task/{tid}/{size}")
-    public RespBody<String> handleNodeFinishTask(
+    @PostMapping("node_add_file/{cid}")
+    public RespBody<String> handleNodeAddFile(
             @RequestHeader String chainAccountInfo,
-            @PathVariable(value = "tid") BigInteger tid,
-            @PathVariable(value = "size") BigInteger size) {
+            @PathVariable(value = "cid") String cid) {
         KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
         if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
             logger.error(wrap.resp.toString());
@@ -264,41 +199,9 @@ public class ChainStorageController {
             return wrap.resp;
         }
 
-        TransactionReceipt receipt = chainStorage.nodeFinishTask(tid, size);
+        TransactionReceipt receipt = chainStorage.nodeAddFile(cid);
         if (!receipt.isStatusOK()) {
-            String msg = "nodeFinishTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        wrap.resp.setData(receipt.toString());
-        return wrap.resp;
-    }
-
-    @PostMapping("node_fail_task/{tid}")
-    public RespBody<String> handleNodeFailTask(@RequestHeader String chainAccountInfo, @PathVariable(value = "tid") BigInteger tid) {
-        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
-            logger.error(wrap.resp.toString());
-            return wrap.resp;
-        }
-
-        ChainStorage chainStorage;
-        try {
-            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-        } catch (ContractException e) {
-            String msg = "loadChainStorageContract Exception:" + e.getMessage();
-            logger.warn(msg);
-            wrap.resp.setData(msg);
-            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
-            return wrap.resp;
-        }
-
-        TransactionReceipt receipt = chainStorage.nodeFailTask(tid);
-        if (!receipt.isStatusOK()) {
-            String msg = "nodeFailTask failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
+            String msg = "nodeAddFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
             logger.warn(msg);
             wrap.resp.setData(msg);
             wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);

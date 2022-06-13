@@ -1,6 +1,6 @@
 package com.ancun.chain_storage.controller;
 
-import com.ancun.chain_storage.contracts.File;
+import com.ancun.chain_storage.contracts.FileManager;
 import com.ancun.chain_storage.contracts.FileStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
@@ -54,9 +54,9 @@ public class FileController {
     @GetMapping("get_size/{cid}")
     public RespBody<String> handleGetSize(@PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileManager fileManager = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileManager = blockchainService.loadFileContract();
         } catch (ContractException e) {
             logger.warn("loadFileContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -66,7 +66,7 @@ public class FileController {
 
         BigInteger size;
         try {
-            size = file.getSize(cid);
+            size = fileManager.getSize(cid);
         } catch (ContractException e) {
             logger.warn("file.getSize({}) exception:{}", cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -162,11 +162,11 @@ public class FileController {
     @GetMapping("get_nodes/{cid}")
     public RespBody<String> handleGetNodes(@PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
-        File file = null;
+        FileStorage fileStorage = null;
         try {
-            file = blockchainService.loadFileContract();
+            fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadFileContract exception:{}", e.toString());
+            logger.warn("loadFileStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -174,9 +174,9 @@ public class FileController {
 
         List<String> nodes;
         try {
-            nodes = file.getNodes(cid);
+            nodes = fileStorage.getNodes(cid);
         } catch (ContractException e) {
-            logger.warn("file.getNodes({}) exception:{}", cid, e.toString());
+            logger.warn("fileStorage.getNodes({}) exception:{}", cid, e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -213,30 +213,30 @@ public class FileController {
         return resp;
     }
 
-    @GetMapping("get_total_file_number")
+    @GetMapping("get_file_count")
     public RespBody<String> handleGetTotalFileNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         FileStorage fileStorage = null;
         try {
             fileStorage = blockchainService.loadFileStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadFileContract exception:{}", e.toString());
+            logger.warn("loadFileStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        BigInteger totalFileNumber;
+        BigInteger fileCount;
         try {
-            totalFileNumber = fileStorage.getTotalFileNumber();
+            fileCount = fileStorage.getFileCount();
         } catch (ContractException e) {
-            logger.warn("fileStorage.getTotalFileNumber() exception:{}", e.toString());
+            logger.warn("fileStorage.getFileCount() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(totalFileNumber.toString());
+        resp.setData(fileCount.toString());
         return resp;
     }
 }

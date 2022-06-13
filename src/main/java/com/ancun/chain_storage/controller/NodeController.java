@@ -52,33 +52,6 @@ public class NodeController {
         return resp;
     }
 
-    @GetMapping("get_status/{address}")
-    public RespBody<String> handleGetStatus(@PathVariable(value = "address") String address) {
-        RespBody<String> resp = new RespBody<>(SUCCESS);
-        NodeStorage nodeStorage = null;
-        try {
-            nodeStorage = blockchainService.loadNodeStorageContract();
-        } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        BigInteger status;
-        try {
-            status = nodeStorage.getStatus(address);
-        } catch (ContractException e) {
-            logger.warn("nodeStorage.getStatus({}) exception:{}", address, e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        resp.setData(status.toString());
-        return resp;
-    }
-
     @GetMapping("get_ext/{address}")
     public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
@@ -136,76 +109,49 @@ public class NodeController {
         return resp;
     }
 
-    @GetMapping("get_total_node_number")
+    @GetMapping("get_node_count")
     public RespBody<String> handleGetTotalNodeNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         NodeStorage nodeStorage = null;
         try {
             nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
+            logger.warn("loadNodeStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        BigInteger number;
+        BigInteger nodeCount;
         try {
-            number = nodeStorage.getTotalNodeNumber();
+            nodeCount = nodeStorage.getNodeCount();
         } catch (ContractException e) {
-            logger.warn("nodeStorage.getTotalNodeNumber() exception:{}", e.toString());
+            logger.warn("nodeStorage.getNodeCount() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(number.toString());
+        resp.setData(nodeCount.toString());
         return resp;
     }
 
-    @GetMapping("get_total_online_node_number")
-    public RespBody<String> handleGetTotalOnlineNodeNumber() {
+    @GetMapping("get_all_node_addresses/{pageSize}/{pageNumber}")
+    public RespBody<String> handleGetAllNodeAddresses(@PathVariable(value="pageSize") BigInteger pageSize, @PathVariable(value="pageNumber") BigInteger pageNumber) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         NodeStorage nodeStorage = null;
         try {
             nodeStorage = blockchainService.loadNodeStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
+            logger.warn("loadNodeStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        BigInteger number;
+        Tuple2<List<String>, Boolean> result;
         try {
-            number = nodeStorage.getTotalOnlineNodeNumber();
-        } catch (ContractException e) {
-            logger.warn("nodeStorage.getTotalOnlineNodeNumber() exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        resp.setData(number.toString());
-        return resp;
-    }
-
-    @GetMapping("get_all_node_addresses")
-    public RespBody<String> handleGetAllNodeAddresses() {
-        RespBody<String> resp = new RespBody<>(SUCCESS);
-        NodeStorage nodeStorage = null;
-        try {
-            nodeStorage = blockchainService.loadNodeStorageContract();
-        } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        List<String> addresses;
-        try {
-            addresses = nodeStorage.getAllNodeAddresses();
+            result = nodeStorage.getAllNodeAddresses(pageSize, pageNumber);
         } catch (ContractException e) {
             logger.warn("nodeStorage.getAllNodeAddresses() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
@@ -213,34 +159,7 @@ public class NodeController {
             return resp;
         }
 
-        resp.setData(addresses.toString());
-        return resp;
-    }
-
-    @GetMapping("get_all_online_node_addresses")
-    public RespBody<String> handleGetAllOnlineNodeAddresses() {
-        RespBody<String> resp = new RespBody<>(SUCCESS);
-        NodeStorage nodeStorage = null;
-        try {
-            nodeStorage = blockchainService.loadNodeStorageContract();
-        } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        List<String> addresses;
-        try {
-            addresses = nodeStorage.getAllOnlineNodeAddresses();
-        } catch (ContractException e) {
-            logger.warn("nodeStorage.getAllOnlineNodeAddresses() exception:{}", e.toString());
-            resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
-            resp.setData(e.getMessage());
-            return resp;
-        }
-
-        resp.setData(addresses.toString());
+        resp.setData(result.toString());
         return resp;
     }
 }

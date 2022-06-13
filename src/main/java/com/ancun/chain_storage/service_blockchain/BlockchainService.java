@@ -6,7 +6,6 @@ import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderInterface;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 public interface BlockchainService {
@@ -22,25 +21,19 @@ public interface BlockchainService {
     Resolver loadResolverContract(String contractAddress) throws ContractException;
     ChainStorage loadChainStorageContract(CryptoKeyPair keyPair, String contractAddress);
     Setting loadSettingContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
+    NodeManager loadNodeManagerContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
     NodeStorage loadNodeStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
+    FileManager loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
     FileStorage loadFileStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
+    UserManager loadUserManagerContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
     UserStorage loadUserStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    TaskStorage loadTaskStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
-    Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException;
     ChainStorage loadChainStorageContract(CryptoKeyPair keyPair) throws ContractException;
     Setting loadSettingContract(CryptoKeyPair keyPair) throws ContractException;
-    Node loadNodeContract(CryptoKeyPair keyPair) throws ContractException;
-    File loadFileContract() throws ContractException;
+    NodeManager loadNodeManagerContract(CryptoKeyPair keyPair) throws ContractException;
+    FileManager loadFileContract() throws ContractException;
     FileStorage loadFileStorageContract() throws ContractException;
-    User loadUserContract() throws ContractException;
+    UserManager loadUserManagerContract() throws ContractException;
     UserStorage loadUserStorageContract() throws ContractException;
-    Task loadTaskContract() throws ContractException;
-    TaskStorage loadTaskStorageContract() throws ContractException;
-    Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractException;
-    Node loadNodeContract() throws ContractException;
+    NodeManager loadNodeManagerContract() throws ContractException;
     NodeStorage loadNodeStorageContract() throws ContractException;
 }

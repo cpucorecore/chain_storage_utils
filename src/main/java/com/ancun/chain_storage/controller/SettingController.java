@@ -34,11 +34,6 @@ public class SettingController {
     public static final String MaxMonitorExtLength = "MaxMonitorExtLength";
     public static final String MaxFileExtLength = "MaxFileExtLength";
     public static final String MaxCidLength = "MaxCidLength";
-    public static final String TaskAcceptTimeoutSeconds = "TaskAcceptTimeoutSeconds";
-    public static final String AddFileTaskTimeoutSeconds = "AddFileTaskTimeoutSeconds";
-    public static final String AddFileProgressTimeoutSeconds = "AddFileProgressTimeoutSeconds";
-    public static final String DeleteFileTaskTimeoutSeconds = "DeleteFileTaskTimeoutSeconds";
-    public static final String MaxAddFileFailedCount = "MaxAddFileFailedCount";
     private Logger logger = LoggerFactory.getLogger(SettingController.class);
 
     @Resource
@@ -97,21 +92,6 @@ public class SettingController {
             case MaxCidLength:
                 receipt = setting.setMaxCidLength(bigIntegerValue);
                 break;
-            case TaskAcceptTimeoutSeconds:
-                receipt = setting.setTaskAcceptTimeout(bigIntegerValue);
-                break;
-            case AddFileTaskTimeoutSeconds:
-                receipt = setting.setAddFileTaskTimeout(bigIntegerValue);
-                break;
-            case AddFileProgressTimeoutSeconds:
-                receipt = setting.setAddFileProgressTimeout(bigIntegerValue);
-                break;
-            case DeleteFileTaskTimeoutSeconds:
-                receipt = setting.setDeleteFileTaskTimeout(bigIntegerValue);
-                break;
-            case MaxAddFileFailedCount:
-                receipt = setting.setMaxAddFileFailedCount(bigIntegerValue);
-                break;
             default:
                 wrap.resp.setNFTResponseInfo(CS_Setting_Unknown_key);
                 logger.error("unknown setting key:{}", key);
@@ -168,21 +148,6 @@ public class SettingController {
                     break;
                 case MaxCidLength:
                     value = setting.getMaxCidLength();
-                    break;
-                case TaskAcceptTimeoutSeconds:
-                    value = setting.getTaskAcceptTimeout();
-                    break;
-                case AddFileTaskTimeoutSeconds:
-                    value = setting.getAddFileTaskTimeout();
-                    break;
-                case AddFileProgressTimeoutSeconds:
-                    value = setting.getAddFileProgressTimeout();
-                    break;
-                case DeleteFileTaskTimeoutSeconds:
-                    value = setting.getDeleteFileTaskTimeout();
-                    break;
-                case MaxAddFileFailedCount:
-                    value = setting.getMaxAddFileFailedCount();
                     break;
                 default:
                     wrap.resp.setNFTResponseInfo(CS_Setting_Unknown_key);

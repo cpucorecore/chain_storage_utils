@@ -190,7 +190,7 @@ public class UserController {
         return resp;
     }
 
-    @GetMapping("get_total_user_number")
+    @GetMapping("get_user_count")
     public RespBody<String> handleGetTotalUserNumber() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         UserStorage userStorage = null;
@@ -205,9 +205,9 @@ public class UserController {
 
         BigInteger number;
         try {
-            number = userStorage.getTotalUserNumber();
+            number = userStorage.getUserCount();
         } catch (ContractException e) {
-            logger.warn("userStorage.getTotalUserNumber() exception:{}", e.toString());
+            logger.warn("userStorage.getUserCount() exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
@@ -217,7 +217,7 @@ public class UserController {
         return resp;
     }
 
-    @GetMapping("get_cids/{address}/{page_number}/{page_size}")
+    @GetMapping("get_files/{address}/{page_number}/{page_size}")
     public RespBody<String> handleGetCids(@PathVariable(value = "address") String address,
                                           @PathVariable(value = "page_number") BigInteger pageNumber,
                                           @PathVariable(value = "page_size") BigInteger pageSize) {
@@ -226,23 +226,23 @@ public class UserController {
         try {
             userStorage = blockchainService.loadUserStorageContract();
         } catch (ContractException e) {
-            logger.warn("loadNodeContract exception:{}", e.toString());
+            logger.warn("loadUserStorageContract exception:{}", e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        Tuple2<List<String>, Boolean> cids;
+        Tuple2<List<String>, Boolean> files;
         try {
-            cids = userStorage.getCids(address, pageNumber, pageSize);
+            files = userStorage.getFiles(address, pageNumber, pageSize);
         } catch (ContractException e) {
-            logger.warn("userStorage.getFileDuration({}, {}, {}) exception:{}", address, pageNumber.toString(), pageSize.toString(), e.toString());
+            logger.warn("userStorage.getFiles({}, {}, {}) exception:{}", address, pageNumber.toString(), pageSize.toString(), e.toString());
             resp.setNFTResponseInfo(CONTRACT_EXCEPTION);
             resp.setData(e.getMessage());
             return resp;
         }
 
-        resp.setData(cids.toString());
+        resp.setData(files.toString());
         return resp;
     }
 }

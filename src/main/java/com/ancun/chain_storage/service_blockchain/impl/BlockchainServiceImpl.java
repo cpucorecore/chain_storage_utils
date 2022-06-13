@@ -25,30 +25,26 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     public static final String CN_Resolver = "Resolver";
     public static final String CN_Setting = "Setting";
+    public static final String CN_Blacklist = "Blacklist";
     public static final String CN_ChainStorage = "ChainStorage";
-    public static final String CN_Node = "Node";
+    public static final String CN_NodeManager = "NodeManager";
     public static final String CN_NodeStorage = "NodeStorage";
-    public static final String CN_User = "User";
+    public static final String CN_UserManager = "UserManager";
     public static final String CN_UserStorage = "UserStorage";
-    public static final String CN_File = "File";
+    public static final String CN_FileManager = "FileManager";
     public static final String CN_FileStorage = "FileStorage";
-    public static final String CN_Task = "Task";
-    public static final String CN_TaskStorage = "TaskStorage";
-    public static final String CN_Monitor = "Monitor";
-
     public static final String Account_Admin = "Admin";
     public static final byte[] ResolverBytes32 = String2SolidityBytes32(CN_Resolver);
     public static final byte[] SettingBytes32 = String2SolidityBytes32(CN_Setting);
+
+    public static final byte[] BlacklistBytes32 = String2SolidityBytes32(CN_Blacklist);
     public static final byte[] ChainStorageBytes32 = String2SolidityBytes32(CN_ChainStorage);
-    public static final byte[] NodeBytes32 = String2SolidityBytes32(CN_Node);
+    public static final byte[] NodeManagerBytes32 = String2SolidityBytes32(CN_NodeManager);
     public static final byte[] NodeStorageBytes32 = String2SolidityBytes32(CN_NodeStorage);
-    public static final byte[] UserBytes32 = String2SolidityBytes32(CN_User);
+    public static final byte[] UserManagerBytes32 = String2SolidityBytes32(CN_UserManager);
     public static final byte[] UserStorageBytes32 = String2SolidityBytes32(CN_UserStorage);
-    public static final byte[] FileBytes32 = String2SolidityBytes32(CN_File);
+    public static final byte[] FileManagerBytes32 = String2SolidityBytes32(CN_FileManager);
     public static final byte[] FileStorageBytes32 = String2SolidityBytes32(CN_FileStorage);
-    public static final byte[] TaskBytes32 = String2SolidityBytes32(CN_Task);
-    public static final byte[] TaskStorageBytes32 = String2SolidityBytes32(CN_TaskStorage);
-    public static final byte[] MonitorBytes32 = String2SolidityBytes32(CN_Monitor);
 
     public static final byte[] AdminBytes32 = String2SolidityBytes32(Account_Admin);
 
@@ -85,16 +81,14 @@ public class BlockchainServiceImpl implements BlockchainService {
 
             contractNames.put(CN_Resolver, ResolverBytes32);
             contractNames.put(CN_Setting, SettingBytes32);
+            contractNames.put(CN_Blacklist, BlacklistBytes32);
             contractNames.put(CN_ChainStorage, ChainStorageBytes32);
-            contractNames.put(CN_Node, NodeBytes32);
+            contractNames.put(CN_NodeManager, NodeManagerBytes32);
             contractNames.put(CN_NodeStorage, NodeStorageBytes32);
-            contractNames.put(CN_User, UserBytes32);
+            contractNames.put(CN_UserManager, UserManagerBytes32);
             contractNames.put(CN_UserStorage, UserStorageBytes32);
-            contractNames.put(CN_File, FileBytes32);
+            contractNames.put(CN_FileManager, FileManagerBytes32);
             contractNames.put(CN_FileStorage, FileStorageBytes32);
-            contractNames.put(CN_Task, TaskBytes32);
-            contractNames.put(CN_TaskStorage, TaskStorageBytes32);
-            contractNames.put(CN_Monitor, MonitorBytes32);
         }
         if (null == decoder) {
             decoder = new TransactionDecoderService(client.getCryptoSuite());
@@ -144,20 +138,20 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
 
         // File and FileStorage
-        File file = File.deploy(client, keyPair, resolver.getContractAddress());
-        contractAddresses.put("file", file.getContractAddress());
-        logger.info("File deploy finish: {}", file.getContractAddress());
+        FileManager fileManager = FileManager.deploy(client, keyPair, resolver.getContractAddress());
+        contractAddresses.put("fileManager", fileManager.getContractAddress());
+        logger.info("FileManager deploy finish: {}", fileManager.getContractAddress());
 
-        FileStorage fileStorage = FileStorage.deploy(client, keyPair, file.getContractAddress());
+        FileStorage fileStorage = FileStorage.deploy(client, keyPair, fileManager.getContractAddress());
         contractAddresses.put("fileStorage", fileStorage.getContractAddress());
         logger.info("FileStorage deploy finish: {}", fileStorage.getContractAddress());
 
-        receipt = file.setStorage(fileStorage.getContractAddress());
+        receipt = fileManager.setStorage(fileStorage.getContractAddress());
         if (!receipt.isStatusOK()) {
-            throw new Exception("file.setStorage failed: " + receipt.getMessage());
+            throw new Exception("fileManager.setStorage failed: " + receipt.getMessage());
         }
 
-        receipt = resolver.setAddress(FileBytes32, file.getContractAddress());
+        receipt = resolver.setAddress(FileManagerBytes32, fileManager.getContractAddress());
         if (!receipt.isStatusOK()) {
             throw new Exception("resolver.setAddress(File) failed: " + receipt.getMessage());
         }
@@ -168,20 +162,20 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
 
         // User and UserStorage
-        User user = User.deploy(client, keyPair, resolver.getContractAddress());
-        contractAddresses.put("user", user.getContractAddress());
-        logger.info("User deploy finish: {}", user.getContractAddress());
+        UserManager userManager = UserManager.deploy(client, keyPair, resolver.getContractAddress());
+        contractAddresses.put("userManager", userManager.getContractAddress());
+        logger.info("UserManager deploy finish: {}", userManager.getContractAddress());
 
-        UserStorage userStorage = UserStorage.deploy(client, keyPair, user.getContractAddress());
+        UserStorage userStorage = UserStorage.deploy(client, keyPair, userManager.getContractAddress());
         contractAddresses.put("userStorage", userStorage.getContractAddress());
         logger.info("UserStorage deploy finish: {}", userStorage.getContractAddress());
 
-        receipt = user.setStorage(userStorage.getContractAddress());
+        receipt = userManager.setStorage(userStorage.getContractAddress());
         if (!receipt.isStatusOK()) {
-            throw new Exception("user.setStorage failed: " + receipt.getMessage());
+            throw new Exception("userManager.setStorage failed: " + receipt.getMessage());
         }
 
-        receipt = resolver.setAddress(UserBytes32, user.getContractAddress());
+        receipt = resolver.setAddress(UserManagerBytes32, userManager.getContractAddress());
         if (!receipt.isStatusOK()) {
             throw new Exception("resolver.setAddress(User) failed: " + receipt.getMessage());
         }
@@ -192,20 +186,20 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
 
         // Node and NodeStorage
-        Node node = Node.deploy(client, keyPair, resolver.getContractAddress());
-        contractAddresses.put("node", node.getContractAddress());
-        logger.info("Node deploy finish: {}", node.getContractAddress());
+        NodeManager nodeManager = NodeManager.deploy(client, keyPair, resolver.getContractAddress());
+        contractAddresses.put("nodeManager", nodeManager.getContractAddress());
+        logger.info("NodeManager deploy finish: {}", nodeManager.getContractAddress());
 
-        NodeStorage nodeStorage = NodeStorage.deploy(client, keyPair, node.getContractAddress());
+        NodeStorage nodeStorage = NodeStorage.deploy(client, keyPair, nodeManager.getContractAddress());
         contractAddresses.put("nodeStorage", nodeStorage.getContractAddress());
         logger.info("NodeStorage deploy finish: {}", nodeStorage.getContractAddress());
 
-        receipt = node.setStorage(nodeStorage.getContractAddress());
+        receipt = nodeManager.setStorage(nodeStorage.getContractAddress());
         if (!receipt.isStatusOK()) {
-            throw new Exception("node.setStorage failed: " + receipt.getMessage());
+            throw new Exception("nodeManager.setStorage failed: " + receipt.getMessage());
         }
 
-        receipt = resolver.setAddress(NodeBytes32, node.getContractAddress());
+        receipt = resolver.setAddress(NodeManagerBytes32, nodeManager.getContractAddress());
         if (!receipt.isStatusOK()) {
             throw new Exception("resolver.setAddress(Node) failed: " + receipt.getMessage());
         }
@@ -213,30 +207,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         receipt = resolver.setAddress(NodeStorageBytes32, nodeStorage.getContractAddress());
         if (!receipt.isStatusOK()) {
             throw new Exception("resolver.setAddress(NodeStorage) failed: " + receipt.getMessage());
-        }
-
-        // Task and TaskStorage
-        Task task = Task.deploy(client, keyPair, resolver.getContractAddress());
-        contractAddresses.put("task", task.getContractAddress());
-        logger.info("Task deploy finish: {}", task.getContractAddress());
-
-        TaskStorage taskStorage = TaskStorage.deploy(client, keyPair, task.getContractAddress());
-        contractAddresses.put("taskStorage", taskStorage.getContractAddress());
-        logger.info("TaskStorage deploy finish: {}", taskStorage.getContractAddress());
-
-        receipt = task.setStorage(taskStorage.getContractAddress());
-        if (!receipt.isStatusOK()) {
-            throw new Exception("task.setStorage failed: " + receipt.getMessage());
-        }
-
-        receipt = resolver.setAddress(TaskBytes32, task.getContractAddress());
-        if (!receipt.isStatusOK()) {
-            throw new Exception("resolver.setAddress(Task) failed: " + receipt.getMessage());
-        }
-
-        receipt = resolver.setAddress(TaskStorageBytes32, taskStorage.getContractAddress());
-        if (!receipt.isStatusOK()) {
-            throw new Exception("resolver.setAddress(TaskStorage) failed: " + receipt.getMessage());
         }
 
         receipt = resolver.setAddress(AdminBytes32, keyPair.getAddress());
@@ -262,29 +232,23 @@ public class BlockchainServiceImpl implements BlockchainService {
         logger.info("chain storage init finish");
 
         // refresh cache
-        receipt = file.refreshCache();
+        receipt = fileManager.refreshCache();
         if (!receipt.isStatusOK()) {
-            throw new Exception("file refresh cache failed: " + receipt.getMessage());
+            throw new Exception("fileManager refresh cache failed: " + receipt.getMessage());
         }
-        logger.info("file refreshCache finish");
+        logger.info("fileManager refreshCache finish");
 
-        receipt = user.refreshCache();
+        receipt = userManager.refreshCache();
         if (!receipt.isStatusOK()) {
-            throw new Exception("user refresh cache failed: " + receipt.getMessage());
+            throw new Exception("userManager refresh cache failed: " + receipt.getMessage());
         }
-        logger.info("user refreshCache finish");
+        logger.info("userManager refreshCache finish");
 
-        receipt = node.refreshCache();
+        receipt = nodeManager.refreshCache();
         if (!receipt.isStatusOK()) {
-            throw new Exception("node refresh cache failed: " + receipt.getMessage());
+            throw new Exception("nodeManager refresh cache failed: " + receipt.getMessage());
         }
-        logger.info("node refreshCache finish");
-
-        receipt = task.refreshCache();
-        if (!receipt.isStatusOK()) {
-            throw new Exception("task refresh cache failed: " + receipt.getMessage());
-        }
-        logger.info("task refreshCache finish");
+        logger.info("nodeManager refreshCache finish");
 
         receipt = chainStorage.refreshCache();
         if (!receipt.isStatusOK()) {
@@ -316,26 +280,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         receipt = setting.setInitSpace(BigInteger.valueOf(1024*1024*5));
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setInitSpace failed: " + receipt.getMessage());
-        }
-        receipt = setting.setTaskAcceptTimeout(BigInteger.valueOf(1000*3600*24));
-        if (!receipt.isStatusOK()) {
-            throw new Exception("setting setTaskAcceptTimeoutSeconds failed: " + receipt.getMessage());
-        }
-        receipt = setting.setAddFileTaskTimeout(BigInteger.valueOf(1000*3600*24));
-        if (!receipt.isStatusOK()) {
-            throw new Exception("setting setAddFileTaskTimeoutSeconds failed: " + receipt.getMessage());
-        }
-        receipt = setting.setDeleteFileTaskTimeout(BigInteger.valueOf(1000*3600*24));
-        if (!receipt.isStatusOK()) {
-            throw new Exception("setting setDeleteFileTaskTimeoutSeconds failed: " + receipt.getMessage());
-        }
-        receipt = setting.setAddFileProgressTimeout(BigInteger.valueOf(1000*3600*24));
-        if (!receipt.isStatusOK()) {
-            throw new Exception("setting setAddFileProgressTimeoutSeconds failed: " + receipt.getMessage());
-        }
-        receipt = setting.setMaxAddFileFailedCount(BigInteger.valueOf(6));
-        if (!receipt.isStatusOK()) {
-            throw new Exception("setting setMaxAddFileFailedCount failed: " + receipt.getMessage());
         }
         logger.info("setting setup finish");
 
@@ -389,10 +333,10 @@ public class BlockchainServiceImpl implements BlockchainService {
         return setting;
     }
 
-    public Node loadNodeContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
+    public NodeManager loadNodeManagerContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
-        Node node = Node.load(contractAddress, client, keyPair);
-        return node;
+        NodeManager nodeManager = NodeManager.load(contractAddress, client, keyPair);
+        return nodeManager;
     }
 
     public NodeStorage loadNodeStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
@@ -401,12 +345,12 @@ public class BlockchainServiceImpl implements BlockchainService {
         return nodeStorage;
     }
 
-    public File loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
+    public FileManager loadFileContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
-        File file = File.load(contractAddress, client, keyPair);
-        BigInteger size = file.getSize("");
-        logger.debug("File.getSize():{}", size);
-        return file;
+        FileManager fileManager = FileManager.load(contractAddress, client, keyPair);
+        BigInteger size = fileManager.getSize("");
+        logger.debug("FileManager.getSize():{}", size);
+        return fileManager;
     }
 
     public FileStorage loadFileStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
@@ -417,38 +361,16 @@ public class BlockchainServiceImpl implements BlockchainService {
         return fileStorage;
     }
 
-    public User loadUserContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
+    public UserManager loadUserManagerContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
-        User user = User.load(contractAddress, client, keyPair);
-        return user;
+        UserManager userManager = UserManager.load(contractAddress, client, keyPair);
+        return userManager;
     }
 
     public UserStorage loadUserStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
         sdkClientInstance();
         UserStorage userStorage = UserStorage.load(contractAddress, client, keyPair);
         return userStorage;
-    }
-
-    public Task loadTaskContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
-        sdkClientInstance();
-        Task task = Task.load(contractAddress, client, keyPair);
-        Boolean exist = task.exist(BigInteger.valueOf(1));
-        logger.debug("Task.exist():{}", exist);
-        return task;
-    }
-
-    public TaskStorage loadTaskStorageContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
-        sdkClientInstance();
-        TaskStorage taskStorage = TaskStorage.load(contractAddress, client, keyPair);
-        Boolean exist = taskStorage.exist(BigInteger.valueOf(1));
-        logger.debug("Task.exist():{}", exist);
-        return taskStorage;
-    }
-
-    public Monitor loadMonitorContract(CryptoKeyPair keyPair, String contractAddress) throws ContractException {
-        sdkClientInstance();
-        Monitor monitor = Monitor.load(contractAddress, client, keyPair);
-        return monitor;
     }
 
     public String getTransactionByHash(String hash) {
@@ -472,13 +394,13 @@ public class BlockchainServiceImpl implements BlockchainService {
         return loadSettingContract(keyPair, address);
     }
 
-    public Node loadNodeContract(CryptoKeyPair keyPair) throws ContractException {
-        String address = getContractAddress(CN_Node);
-        return loadNodeContract(keyPair, address);
+    public NodeManager loadNodeManagerContract(CryptoKeyPair keyPair) throws ContractException {
+        String address = getContractAddress(CN_NodeManager);
+        return loadNodeManagerContract(keyPair, address);
     }
 
-    public File loadFileContract() throws ContractException {
-        String address = getContractAddress(CN_File);
+    public FileManager loadFileContract() throws ContractException {
+        String address = getContractAddress(CN_FileManager);
         return loadFileContract(keyPairForRead, address);
     }
 
@@ -487,9 +409,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         return loadFileStorageContract(keyPairForRead, address);
     }
 
-    public User loadUserContract() throws ContractException {
-        String address = getContractAddress(CN_User);
-        return loadUserContract(keyPairForRead, address);
+    public UserManager loadUserManagerContract() throws ContractException {
+        String address = getContractAddress(CN_UserManager);
+        return loadUserManagerContract(keyPairForRead, address);
     }
 
     public UserStorage loadUserStorageContract() throws ContractException {
@@ -497,24 +419,9 @@ public class BlockchainServiceImpl implements BlockchainService {
         return loadUserStorageContract(keyPairForRead, address);
     }
 
-    public Task loadTaskContract() throws ContractException {
-        String address = getContractAddress(CN_Task);
-        return loadTaskContract(keyPairForRead, address);
-    }
-
-    public TaskStorage loadTaskStorageContract() throws ContractException {
-        String address = getContractAddress(CN_TaskStorage);
-        return loadTaskStorageContract(keyPairForRead, address);
-    }
-
-    public Monitor loadMonitorContract(CryptoKeyPair keyPair) throws ContractException {
-        String address = getContractAddress(CN_Monitor);
-        return loadMonitorContract(keyPair, address);
-    }
-
-    public Node loadNodeContract() throws ContractException {
-        String address = getContractAddress(CN_Node);
-        return loadNodeContract(keyPairForRead, address);
+    public NodeManager loadNodeManagerContract() throws ContractException {
+        String address = getContractAddress(CN_NodeManager);
+        return loadNodeManagerContract(keyPairForRead, address);
     }
 
     public NodeStorage loadNodeStorageContract() throws ContractException {
