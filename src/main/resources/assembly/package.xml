@@ -12,7 +12,7 @@
     <!-- Sets the base directory of the resulting assembly archive.
     If this is not set and includeBaseDirectory == true, ${project.build.finalName} will be used instead.
     (Since 2.2-beta-1) -->
-    <baseDirectory>nft_service</baseDirectory>
+    <baseDirectory>cs_service</baseDirectory>
     <includeBaseDirectory>true</includeBaseDirectory>
 
     <fileSets>

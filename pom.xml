@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.ancun</groupId>
-    <artifactId>nft_service</artifactId>
+    <artifactId>cs_service</artifactId>
     <version>1.0.0</version>
-    <name>nft_service</name>
-    <description>nft service</description>
+    <name>cs_service</name>
+    <description>chain storage service</description>
 
     <properties>
         <java.version>1.8</java.version>
@@ -119,7 +119,7 @@
                     <encoding>UTF-8</encoding>
                     <programs>
                         <program>
-                            <mainClass>com.ancun.chain_storage.NFTServiceApplication</mainClass>
+                            <mainClass>com.ancun.chain_storage.CSServiceApplication</mainClass>
                             <id>start</id>
                             <jvmSettings>
                                 <extraArguments>
@@ -154,8 +154,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- 指定最终生成安装包的名字 -->
-                    <finalName>nft_service</finalName>
+                    <finalName>cs_service</finalName>
                     <descriptors>
                         <descriptor>src/main/resources/assembly/package.xml</descriptor>
                     </descriptors>

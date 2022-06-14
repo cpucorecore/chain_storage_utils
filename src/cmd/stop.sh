@@ -1,4 +1,4 @@
-pid=`ps -ef|grep java |grep NFTServiceApplication | awk '{print $2}'`
+pid=`ps -ef|grep java |grep CSServiceApplication | awk '{print $2}'`
 if [ -z ${pid} ];
 then
   echo not started
