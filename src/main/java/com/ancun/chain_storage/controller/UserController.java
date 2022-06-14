@@ -191,7 +191,7 @@ public class UserController {
     }
 
     @GetMapping("get_user_count")
-    public RespBody<String> handleGetTotalUserNumber() {
+    public RespBody<String> handleGetUserCount() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         UserStorage userStorage = null;
         try {
@@ -218,7 +218,7 @@ public class UserController {
     }
 
     @GetMapping("get_files/{address}/{page_number}/{page_size}")
-    public RespBody<String> handleGetCids(@PathVariable(value = "address") String address,
+    public RespBody<String> handleGetFiles(@PathVariable(value = "address") String address,
                                           @PathVariable(value = "page_number") BigInteger pageNumber,
                                           @PathVariable(value = "page_size") BigInteger pageSize) {
         RespBody<String> resp = new RespBody<>(SUCCESS);

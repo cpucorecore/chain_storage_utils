@@ -36,7 +36,6 @@ public class BlockchainServiceImpl implements BlockchainService {
     public static final String Account_Admin = "Admin";
     public static final byte[] ResolverBytes32 = String2SolidityBytes32(CN_Resolver);
     public static final byte[] SettingBytes32 = String2SolidityBytes32(CN_Setting);
-
     public static final byte[] BlacklistBytes32 = String2SolidityBytes32(CN_Blacklist);
     public static final byte[] ChainStorageBytes32 = String2SolidityBytes32(CN_ChainStorage);
     public static final byte[] NodeManagerBytes32 = String2SolidityBytes32(CN_NodeManager);
@@ -58,6 +57,23 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     @Value("${resolverAddress}")
     private String resolverAddress;
+
+    @Value("${settings.MaxCidLen}")
+    private BigInteger MaxCidLen;
+    @Value("${settings.MaxNodeExtLen}")
+    private BigInteger MaxNodeExtLen;
+    @Value("${settings.MaxUserExtLen}")
+    private BigInteger MaxUserExtLen;
+    @Value("${settings.MaxFileExtLen}")
+    private BigInteger MaxFileExtLen;
+    @Value("${settings.MaxNodeCanAddFile}")
+    private BigInteger MaxNodeCanAddFile;
+    @Value("${settings.MaxNodeCanDeleteFile}")
+    private BigInteger MaxNodeCanDeleteFile;
+    @Value("${settings.Replica}")
+    private BigInteger Replica;
+    @Value("${settings.UserInitSpace}")
+    private BigInteger UserInitSpace;
 
     private Client client;
     private BcosSDK sdk;
@@ -114,8 +130,8 @@ public class BlockchainServiceImpl implements BlockchainService {
 
     public Map<String, String> deployCSContracts(CryptoKeyPair keyPair) throws Exception {
         sdkClientInstance();
-
         Map<String, String> contractAddresses = new HashMap<>();
+
         Resolver resolver = Resolver.deploy(client, keyPair);
         contractAddresses.put("resolver", resolver.getContractAddress());
         logger.info("resolver deploy finish: {}", resolver.getContractAddress());
@@ -135,6 +151,16 @@ public class BlockchainServiceImpl implements BlockchainService {
         receipt = resolver.setAddress(SettingBytes32, setting.getContractAddress());
         if (!receipt.isStatusOK()) {
             throw new Exception("resolver.setAddress(Setting) failed: " + receipt.getMessage());
+        }
+
+        // Blacklist
+        Blacklist blacklist = Blacklist.deploy(client, keyPair, resolver.getContractAddress());
+        contractAddresses.put("blacklist", blacklist.getContractAddress());
+        logger.info("blacklist deploy finish: {}", blacklist.getContractAddress());
+
+        receipt = resolver.setAddress(BlacklistBytes32, blacklist.getContractAddress());
+        if (!receipt.isStatusOK()) {
+            throw new Exception("resolver.setAddress(Blacklist) failed: " + receipt.getMessage());
         }
 
         // File and FileStorage
@@ -228,7 +254,6 @@ public class BlockchainServiceImpl implements BlockchainService {
         if (!receipt.isStatusOK()) {
             throw new Exception("ChainStorage initialize failed: " + receipt.getMessage());
         }
-
         logger.info("chain storage init finish");
 
         // refresh cache
@@ -250,6 +275,12 @@ public class BlockchainServiceImpl implements BlockchainService {
         }
         logger.info("nodeManager refreshCache finish");
 
+        receipt = blacklist.refreshCache();
+        if (!receipt.isStatusOK()) {
+            throw new Exception("blacklist refresh cache failed: " + receipt.getMessage());
+        }
+        logger.info("blacklist refreshCache finish");
+
         receipt = chainStorage.refreshCache();
         if (!receipt.isStatusOK()) {
             throw new Exception("chainStorage refresh cache failed: " + receipt.getMessage());
@@ -257,29 +288,37 @@ public class BlockchainServiceImpl implements BlockchainService {
         logger.info("chainStorage refreshCache finish");
 
         // setup Settings
-        receipt = setting.setReplica(BigInteger.valueOf(1));
+        receipt = setting.setReplica(Replica);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setReplica failed: " + receipt.getMessage());
         }
-        receipt = setting.setMaxNodeExtLength(BigInteger.valueOf(1024));
+        receipt = setting.setMaxNodeExtLength(MaxNodeExtLen);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setMaxNodeExtLength failed: " + receipt.getMessage());
         }
-        receipt = setting.setMaxUserExtLength(BigInteger.valueOf(1024));
+        receipt = setting.setMaxUserExtLength(MaxUserExtLen);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setMaxUserExtLength failed: " + receipt.getMessage());
         }
-        receipt = setting.setMaxFileExtLength(BigInteger.valueOf(1024));
+        receipt = setting.setMaxFileExtLength(MaxFileExtLen);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setMaxFileExtLength failed: " + receipt.getMessage());
         }
-        receipt = setting.setMaxCidLength(BigInteger.valueOf(1024));
+        receipt = setting.setMaxCidLength(MaxCidLen);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setMaxCidLength failed: " + receipt.getMessage());
         }
-        receipt = setting.setInitSpace(BigInteger.valueOf(1024*1024*5));
+        receipt = setting.setInitSpace(UserInitSpace);
         if (!receipt.isStatusOK()) {
             throw new Exception("setting setInitSpace failed: " + receipt.getMessage());
+        }
+        receipt = setting.setMaxNodeCanAddFileCount(MaxNodeCanAddFile);
+        if (!receipt.isStatusOK()) {
+            throw new Exception("setting setMaxNodeCanAddFileCount failed: " + receipt.getMessage());
+        }
+        receipt = setting.setMaxNodeCanDeleteFileCount(MaxNodeCanDeleteFile);
+        if (!receipt.isStatusOK()) {
+            throw new Exception("setting setMaxNodeCanDeleteFileCount failed: " + receipt.getMessage());
         }
         logger.info("setting setup finish");
 

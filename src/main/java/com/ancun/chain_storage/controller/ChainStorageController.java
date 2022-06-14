@@ -212,6 +212,72 @@ public class ChainStorageController {
         return wrap.resp;
     }
 
+    @PostMapping("node_can_delete_file/{cid}")
+    public RespBody<String> handleNodeCanDeleteFile(@RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.nodeCanDeleteFile(cid);
+        if (!receipt.isStatusOK()) {
+            String msg = "nodeCanDeleteFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
+    @PostMapping("node_delete_file/{cid}")
+    public RespBody<String> handleNodeDeleteFile(
+            @RequestHeader String chainAccountInfo,
+            @PathVariable(value = "cid") String cid) {
+        KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
+        if (wrap.resp.getCode() != ChainStorageResponseInfo.SUCCESS.getCode()) {
+            logger.error(wrap.resp.toString());
+            return wrap.resp;
+        }
+
+        ChainStorage chainStorage;
+        try {
+            chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
+        } catch (ContractException e) {
+            String msg = "loadChainStorageContract Exception:" + e.getMessage();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(LOAD_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        TransactionReceipt receipt = chainStorage.nodeDeleteFile(cid);
+        if (!receipt.isStatusOK()) {
+            String msg = "nodeDeleteFile failed:" + getReceiptReturnMessage(receipt) + ", txHash:" + receipt.getTransactionHash();
+            logger.warn(msg);
+            wrap.resp.setData(msg);
+            wrap.resp.setResponseInfo(CALL_CONTRACT_EXCEPTION);
+            return wrap.resp;
+        }
+
+        wrap.resp.setData(receipt.toString());
+        return wrap.resp;
+    }
+
     @PostMapping("node_change_node_space/{space}")
     public RespBody<String> handleNodeChangeNodeSpace(@RequestHeader String chainAccountInfo, @PathVariable(value = "space") BigInteger space) {
         KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);

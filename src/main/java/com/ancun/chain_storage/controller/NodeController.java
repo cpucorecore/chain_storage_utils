@@ -110,7 +110,7 @@ public class NodeController {
     }
 
     @GetMapping("get_node_count")
-    public RespBody<String> handleGetTotalNodeNumber() {
+    public RespBody<String> handleGetNodeCount() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         NodeStorage nodeStorage = null;
         try {

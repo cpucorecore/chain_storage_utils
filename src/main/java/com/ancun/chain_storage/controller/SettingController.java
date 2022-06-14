@@ -31,9 +31,10 @@ public class SettingController {
     public static final String AdminAccount = "AdminAccount";
     public static final String MaxUserExtLength = "MaxUserExtLength";
     public static final String MaxNodeExtLength = "MaxNodeExtLength";
-    public static final String MaxMonitorExtLength = "MaxMonitorExtLength";
     public static final String MaxFileExtLength = "MaxFileExtLength";
     public static final String MaxCidLength = "MaxCidLength";
+    public static final String MaxNodeCanAddFileCount = "MaxNodeCanAddFileCount";
+    public static final String MaxNodeCanDeleteFileCount = "MaxNodeCanDeleteFileCount";
     private Logger logger = LoggerFactory.getLogger(SettingController.class);
 
     @Resource
@@ -83,14 +84,17 @@ public class SettingController {
             case MaxNodeExtLength:
                 receipt = setting.setMaxNodeExtLength(bigIntegerValue);
                 break;
-            case MaxMonitorExtLength:
-                receipt = setting.setMaxMonitorExtLength(bigIntegerValue);
-                break;
             case MaxFileExtLength:
                 receipt = setting.setMaxFileExtLength(bigIntegerValue);
                 break;
             case MaxCidLength:
                 receipt = setting.setMaxCidLength(bigIntegerValue);
+                break;
+            case MaxNodeCanAddFileCount:
+                receipt = setting.setMaxNodeCanAddFileCount(bigIntegerValue);
+                break;
+            case MaxNodeCanDeleteFileCount:
+                receipt = setting.setMaxNodeCanDeleteFileCount(bigIntegerValue);
                 break;
             default:
                 wrap.resp.setNFTResponseInfo(CS_Setting_Unknown_key);
@@ -140,14 +144,17 @@ public class SettingController {
                 case MaxNodeExtLength:
                     value = setting.getMaxNodeExtLength();
                     break;
-                case MaxMonitorExtLength:
-                    value = setting.getMaxMonitorExtLength();
-                    break;
                 case MaxFileExtLength:
                     value = setting.getMaxFileExtLength();
                     break;
                 case MaxCidLength:
                     value = setting.getMaxCidLength();
+                    break;
+                case MaxNodeCanAddFileCount:
+                    value = setting.getMaxNodeCanAddFileCount();
+                    break;
+                case MaxNodeCanDeleteFileCount:
+                    value = setting.getMaxNodeCanDeleteFileCount();
                     break;
                 default:
                     wrap.resp.setNFTResponseInfo(CS_Setting_Unknown_key);

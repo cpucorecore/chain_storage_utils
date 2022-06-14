@@ -106,7 +106,7 @@ public class FileController {
     }
 
     @GetMapping("get_users/{cid}")
-    public RespBody<String> handleUserExist(@PathVariable(value = "cid") String cid) {
+    public RespBody<String> handleGetUsers(@PathVariable(value = "cid") String cid) {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         FileStorage fileStorage = null;
         try {
@@ -214,7 +214,7 @@ public class FileController {
     }
 
     @GetMapping("get_file_count")
-    public RespBody<String> handleGetTotalFileNumber() {
+    public RespBody<String> handleGetFileCount() {
         RespBody<String> resp = new RespBody<>(SUCCESS);
         FileStorage fileStorage = null;
         try {
