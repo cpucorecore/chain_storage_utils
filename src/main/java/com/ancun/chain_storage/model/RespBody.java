@@ -1,81 +1,65 @@
 package com.ancun.chain_storage.model;
 
-import com.ancun.chain_storage.constants.ChainStorageResponseInfo;
-import com.ancun.chain_storage.constants.NFTResponseInfo;
+import com.ancun.chain_storage.constants.ResponseInfo;
 
 public class RespBody<T> {
-    private int code = NFTResponseInfo.SUCCESS.getCode();
-    private String msg = NFTResponseInfo.SUCCESS.getMsg();
+  private int code = ResponseInfo.SUCCESS.getCode();
+  private String msg = ResponseInfo.SUCCESS.getMsg();
 
-    private T data;
+  private T data;
 
-    public RespBody(int code, String msg) {
-        this.code = code;
-        this.msg = msg;
-    }
+  public RespBody(int code, String msg) {
+    this.code = code;
+    this.msg = msg;
+  }
 
-    public RespBody(NFTResponseInfo info) {
-        this.code = info.getCode();
-        this.msg = info.getMsg();
-    }
+  public RespBody(ResponseInfo info, T data) {
+    this.code = info.getCode();
+    this.msg = info.getMsg();
+    this.data = data;
+  }
 
-    public RespBody(NFTResponseInfo info, T data) {
-        this.code = info.getCode();
-        this.msg = info.getMsg();
-        this.data = data;
-    }
+  public RespBody(ResponseInfo info) {
+    this.code = info.getCode();
+    this.msg = info.getMsg();
+  }
 
-    public RespBody(ChainStorageResponseInfo info, T data) {
-        this.code = info.getCode();
-        this.msg = info.getMsg();
-        this.data = data;
-    }
+  public void setResponseInfo(ResponseInfo info) {
+    this.code = info.getCode();
+    this.msg = info.getMsg();
+  }
 
-    public void setNFTResponseInfo(NFTResponseInfo info) {
-        this.code = info.getCode();
-        this.msg = info.getMsg();
-    }
+  public RespBody(int code, String msg, T data) {
+    this(code, msg);
+    this.data = data;
+  }
 
-    public void setResponseInfo(ChainStorageResponseInfo info) {
-        this.code = info.getCode();
-        this.msg = info.getMsg();
-    }
+  public int getCode() {
+    return code;
+  }
 
-    public RespBody(int code, String msg, T data) {
-        this(code, msg);
-        this.data = data;
-    }
+  public void setCode(int code) {
+    this.code = code;
+  }
 
-    public RespBody(T data) {
-        this.data = data;
-    }
+  public String getMsg() {
+    return msg;
+  }
 
-    public int getCode() {
-        return code;
-    }
+  public void setMsg(String msg) {
+    this.msg = msg;
+  }
 
-    public void setCode(int code) {
-        this.code = code;
-    }
+  public T getData() {
+    return data;
+  }
 
-    public String getMsg() {
-        return msg;
-    }
+  public void setData(T data) {
+    this.data = data;
+  }
 
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    @Override
-    public String toString() {
-        return "RespBody{" + "code=" + code + ", msg=" + msg + '\'' + ", data=" + data + '}';
-    }
+  @Override
+  public String toString() {
+    return "RespBody{" + "code=" + code + ", msg=" + msg + '\'' + ", data=" + data + '}';
+  }
 }

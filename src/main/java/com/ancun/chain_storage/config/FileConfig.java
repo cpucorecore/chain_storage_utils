@@ -9,16 +9,15 @@ import org.springframework.core.io.ClassPathResource;
 @Configuration
 @ComponentScan
 public class FileConfig {
-    @Bean
-    public String getConfigFile() {
-        try {
-            ClassPathResource classPathResource =
-                    new ClassPathResource(ConstantConfig.CONFIG_FILE_NAME);
-            System.out.println(classPathResource.getFile().getPath());
-            return classPathResource.getFile().getPath();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+  @Bean
+  public String getConfigFile() {
+    try {
+      ClassPathResource classPathResource = new ClassPathResource(ConstantConfig.CONFIG_FILE_NAME);
+      System.out.println(classPathResource.getFile().getPath());
+      return classPathResource.getFile().getPath();
+    } catch (Exception e) {
+      e.printStackTrace();
     }
+    return null;
+  }
 }

@@ -1,9 +1,9 @@
 package com.ancun.chain_storage.requests;
 
 public interface Request {
-    boolean check();
+  boolean check();
 
-    String toJsonString();
+  String toJsonString();
 
-    String getContractAddress();
+  String getContractAddress();
 }

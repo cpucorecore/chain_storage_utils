@@ -1,27 +1,28 @@
 package com.ancun.chain_storage.requests;
 
 public class ChainAccountInfo {
-    private String address;
-    private String password;
+  private String address;
 
-    public String getAddress() {
-        return address;
-    }
+  private String password;
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+  public String getAddress() {
+    return address;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public void setAddress(String address) {
+    this.address = address;
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public String getPassword() {
+    return password;
+  }
 
-    public ChainAccountInfo(String address, String password) {
-        this.address = address;
-        this.password = password;
-    }
+  public void setPassword(String password) {
+    this.password = password;
+  }
+
+  public ChainAccountInfo(String address, String password) {
+    this.address = address;
+    this.password = password;
+  }
 }
