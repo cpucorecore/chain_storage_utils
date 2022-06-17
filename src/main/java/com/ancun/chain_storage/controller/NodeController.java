@@ -167,4 +167,60 @@ public class NodeController {
     resp.setData(result.toString());
     return resp;
   }
+
+  @GetMapping("get_cid_count/{nodeAddress}")
+  public RespBody<String> handleGetCidCount(
+      @PathVariable(value = "nodeAddress") String nodeAddress) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    NodeStorage nodeStorage = null;
+    try {
+      nodeStorage = blockchainService.loadNodeStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadNodeStorageContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    BigInteger result;
+    try {
+      result = nodeStorage.getCidCount(nodeAddress);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getCidCount() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(result.toString());
+    return resp;
+  }
+
+  @GetMapping("get_node_can_add_file_count/{nodeAddress}")
+  public RespBody<String> handleGetNodeCanAddFileCount(
+      @PathVariable(value = "nodeAddress") String nodeAddress) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    NodeStorage nodeStorage = null;
+    try {
+      nodeStorage = blockchainService.loadNodeStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadNodeStorageContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    BigInteger result;
+    try {
+      result = nodeStorage.getNodeCanAddFileCount(nodeAddress);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getNodeCanAddFileCount() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(result.toString());
+    return resp;
+  }
 }
