@@ -91,7 +91,7 @@ public class AccountServiceImpl implements AccountService {
     return cryptoKeyPair;
   }
 
-  private void saveChainAccount(ChainAccount chainAccount) throws IOException {
+  private void saveChainAccount(ChainAccount chainAccount) {
     String address = chainAccount.getKeyStore().getAddress();
     String password = chainAccount.getKeyStore().getPassword();
 
@@ -99,7 +99,12 @@ public class AccountServiceImpl implements AccountService {
 
     String keyStoreFilePath = chainAccount.getCryptoKeyPair().getP12KeyStoreFilePath(address);
     Path path = Paths.get(keyStoreFilePath);
-    byte[] keyStoreData = Files.readAllBytes(path);
+    byte[] keyStoreData = new byte[0];
+    try {
+      keyStoreData = Files.readAllBytes(path);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
     KeyStoreEntity keyStore = new KeyStoreEntity(address, password, keyStoreData);
     keyStoreService.saveKeyStore(keyStore);
   }

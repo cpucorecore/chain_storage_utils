@@ -1,5 +1,7 @@
 package com.ancun.chain_storage.service_account.impl;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -58,5 +60,7 @@ public class KeyStoreEntity {
   private String address;
 
   private String password;
+
+  @Column(columnDefinition = "BLOB")
   private byte[] data;
 }

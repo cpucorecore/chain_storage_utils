@@ -44,15 +44,7 @@ public class ChainStorageController {
   @Resource private AccountService accountService;
 
   @PostMapping("/deploy_contract")
-  public RespBody<String> deployContract(
-      @RequestHeader String chainAccountInfo, @RequestBody DeployCSContractRequest request) {
-
-    logger.debug("request:{}", request.toJsonString());
-
-    if (!request.check()) {
-      return new RespBody<>(ResponseInfo.INVALID_REQUEST, request.toJsonString());
-    }
-
+  public RespBody<String> deployContract(@RequestHeader String chainAccountInfo) {
     KeyPairWrap warp = prepareKeyPair(chainAccountInfo);
     if (0 != warp.resp.getCode()) {
       logger.error(warp.resp.toString());
