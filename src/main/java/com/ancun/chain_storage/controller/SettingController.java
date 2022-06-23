@@ -46,7 +46,7 @@ public class SettingController {
 
   @Resource private AccountService accountService;
 
-  @PutMapping("{key}/{value}")
+  @PutMapping("/{key}/{value}")
   public RespBody<String> set(
       @RequestHeader String chainAccountInfo,
       @PathVariable(value = "key") String key,
@@ -114,7 +114,7 @@ public class SettingController {
     return wrap.resp;
   }
 
-  @GetMapping("{key}")
+  @GetMapping("/{key}")
   public RespBody<String> get(
       @RequestHeader String chainAccountInfo, @PathVariable(value = "key") String key) {
     KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);

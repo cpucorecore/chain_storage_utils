@@ -256,4 +256,30 @@ public class NodeController {
     resp.setData(cidHashesString);
     return resp;
   }
+
+  @GetMapping("get_can_add_file_node_addresses/{cid}")
+  public RespBody<List<String>> handleGetCanAddFileNodeAddresses(
+      @PathVariable(value = "cid") String cid) {
+    RespBody<List<String>> resp = new RespBody<>(SUCCESS);
+    NodeStorage nodeStorage = null;
+    try {
+      nodeStorage = blockchainService.loadNodeStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadNodeStorageContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      return resp;
+    }
+
+    List nodeAddresses;
+    try {
+      nodeAddresses = nodeStorage.getCanAddFileNodeAddresses(cid);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getCanAddFileNodeAddresses() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      return resp;
+    }
+
+    resp.setData(nodeAddresses);
+    return resp;
+  }
 }
