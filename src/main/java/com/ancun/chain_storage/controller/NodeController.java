@@ -3,11 +3,13 @@ package com.ancun.chain_storage.controller;
 import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
+import static com.ancun.chain_storage.util.CommonUtils.bytesToHexString;
 
 import com.ancun.chain_storage.contracts.NodeStorage;
 import com.ancun.chain_storage.model.RespBody;
 import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Resource;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
@@ -221,6 +223,37 @@ public class NodeController {
     }
 
     resp.setData(result.toString());
+    return resp;
+  }
+
+  @GetMapping("get_node_can_add_file_cid_hashes/{nodeAddress}")
+  public RespBody<List<String>> handleGetNodeCanAddFileCidHashes(
+      @PathVariable(value = "nodeAddress") String nodeAddress) {
+    RespBody<List<String>> resp = new RespBody<>(SUCCESS);
+    NodeStorage nodeStorage = null;
+    try {
+      nodeStorage = blockchainService.loadNodeStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadNodeStorageContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      return resp;
+    }
+
+    List cidHashes;
+    try {
+      cidHashes = nodeStorage.getNodeCanAddFileCidHashes(nodeAddress);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getNodeCanAddFileCidHashes() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      return resp;
+    }
+
+    List<String> cidHashesString = new ArrayList<>(cidHashes.size());
+    for (int i = 0; i < cidHashes.size(); i++) {
+      cidHashesString.add("0x" + bytesToHexString((byte[]) cidHashes.get(i)));
+    }
+
+    resp.setData(cidHashesString);
     return resp;
   }
 }

@@ -99,7 +99,7 @@ public class AccountServiceImpl implements AccountService {
 
     String keyStoreFilePath = chainAccount.getCryptoKeyPair().getP12KeyStoreFilePath(address);
     Path path = Paths.get(keyStoreFilePath);
-    byte[] keyStoreData = new byte[0];
+    byte[] keyStoreData;
     try {
       keyStoreData = Files.readAllBytes(path);
     } catch (IOException e) {

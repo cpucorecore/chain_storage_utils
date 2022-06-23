@@ -1,11 +1,10 @@
 server:
   port: 50600
   max-http-header-size: 10000000
-  
+
 logging:
   config: classpath:log4j2.xml
 
-  
 spring:
   redis:
     password:
@@ -13,13 +12,13 @@ spring:
   datasource:
     url: "jdbc:mysql://127.0.0.1:3306/chain_storage?characterEncoding=utf8"
     username: root
-    password: test
-    
+    password: MyNewPass5ABC
+
   jpa:
     hibernate:
       ddl-auto: update
       dialect: "org.hibernate.dialect.MySQL5InnoDBDialect"
-      
+
 settings:
   MaxCidLen: 256
   MaxNodeExtLen: 4096
@@ -30,7 +29,7 @@ settings:
   Replica: 1
   UserInitSpace: 5368709120
 
-resolverAddress: "0x20c65cacd94c27d3cb3e856cc00f5923b6a6c060"
+resolverAddress: "0x0102223f21eecb2c9a22c6d027cc9fc37cb6235a"
 
 chain:
   groupId: 1

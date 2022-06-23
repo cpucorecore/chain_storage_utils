@@ -3,6 +3,7 @@ package com.ancun.chain_storage.controller;
 import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
+import static org.fisco.bcos.sdk.utils.ByteUtils.hexStringToBytes;
 
 import com.ancun.chain_storage.contracts.FileManager;
 import com.ancun.chain_storage.contracts.FileStorage;
@@ -35,6 +36,87 @@ public class FileController {
     Boolean exist = fileStorage.exist(cid);
 
     resp.setData(exist.toString());
+    return resp;
+  }
+
+  @GetMapping("get_status/{cid}")
+  public RespBody<String> handleGetStatus(@PathVariable(value = "cid") String cid) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    FileManager fileManager = null;
+    try {
+      fileManager = blockchainService.loadFileContract();
+    } catch (ContractException e) {
+      logger.warn("loadFileContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    BigInteger status;
+    try {
+      status = fileManager.getStatus(cid);
+    } catch (ContractException e) {
+      logger.warn("file.getSize({}) exception:{}", cid, e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(status.toString());
+    return resp;
+  }
+
+  @GetMapping("get_replica/{cid}")
+  public RespBody<String> handleGetReplica(@PathVariable(value = "cid") String cid) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    FileStorage fileStorage = null;
+    try {
+      fileStorage = blockchainService.loadFileStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadFileContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    BigInteger replica;
+    try {
+      replica = fileStorage.getReplica(cid);
+    } catch (ContractException e) {
+      logger.warn("fileStorage.getReplica({}) exception:{}", cid, e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(replica.toString());
+    return resp;
+  }
+
+  @GetMapping("get_cid/{cidHash}")
+  public RespBody<String> handleGetCid(@PathVariable(value = "cidHash") String cidHash) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    FileStorage fileStorage = null;
+    try {
+      fileStorage = blockchainService.loadFileStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadFileContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    String cid;
+    try {
+      cid = fileStorage.getCid(hexStringToBytes(cidHash));
+    } catch (ContractException e) {
+      logger.warn("fileStorage.cid({}) exception:{}", cidHash, e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(cid);
     return resp;
   }
 

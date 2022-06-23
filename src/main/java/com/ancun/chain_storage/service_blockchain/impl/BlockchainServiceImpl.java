@@ -1,5 +1,7 @@
 package com.ancun.chain_storage.service_blockchain.impl;
 
+import static org.fisco.bcos.sdk.model.CryptoType.SM_TYPE;
+
 import com.ancun.chain_storage.config.FileConfig;
 import com.ancun.chain_storage.contracts.Blacklist;
 import com.ancun.chain_storage.contracts.ChainStorage;
@@ -19,6 +21,9 @@ import java.util.Map;
 import javax.annotation.Resource;
 import org.fisco.bcos.sdk.BcosSDK;
 import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.config.Config;
+import org.fisco.bcos.sdk.config.ConfigOption;
+import org.fisco.bcos.sdk.config.exceptions.ConfigException;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderInterface;
@@ -97,14 +102,18 @@ public class BlockchainServiceImpl implements BlockchainService {
   private TransactionDecoderInterface decoder;
 
   private void sdkClientInstance() {
-    String path = fileConfig.getConfigFile();
+    String configFilePath = fileConfig.getConfigFile();
     if (null == sdk) {
+      ConfigOption configOption = null;
       try {
-        sdk = BcosSDK.build(path);
-      } catch (Exception e) {
-        sdk = BcosSDK.build(path);
+        configOption = Config.load(configFilePath, SM_TYPE);
+      } catch (ConfigException e) {
+        logger.error("load configure failed, exception: {}", e);
       }
+
+      sdk = new BcosSDK(configOption);
     }
+
     if (null == client) {
       client = sdk.getClient(groupId);
 
@@ -121,6 +130,7 @@ public class BlockchainServiceImpl implements BlockchainService {
       contractNames.put(CN_FileManager, FileManagerBytes32);
       contractNames.put(CN_FileStorage, FileStorageBytes32);
     }
+
     if (null == decoder) {
       decoder = new TransactionDecoderService(client.getCryptoSuite());
     }

@@ -1,92 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
-<configuration status="debug" monitorInterval="30">
-    <properties>
-        <!-- 文件输出格式 -->
-        <!-- <property name="PATTERN">%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} %msg%n</property>
-         <property name="file_name">../logs/log-error.log</property>
-         <property name="file_info">../logs/log-info.log</property>
-         <property name="rolling_file_name">logs/app-%d{yyyy-MM-dd}-%i.log.gz</property>
-         <property name="every_file_size">10M</property>&lt;!&ndash; 日志切割的最小单位 &ndash;&gt;
-         <property name="output_log_level">debug</property> 日志输出级别 -->
+<configuration status="info" monitorInterval="30">
+  <properties>
+    <Property name="log_pattern" value="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
+    <Property name="file_path" value="../logs"/>
+    <Property name="file_max_size" value="30MB"/>
+    <Property name="backup_folder" value="$${date:yyyy-MM}"/>
+    <Property name="backup_file_suffix" value="-%d{yyyy-MM-dd}-%i.log"/>
+  </properties>
 
-        <!-- 日志显示模板,显示内容的格式如下 -->
-        <!-- [21:55:33:047] [INFO] - org.apache.juli.logging.DirectJDKLog.log(DirectJDKLog.java:173) - Initializing Spring embedded WebApplicationContext -->
-        <Property name="log_pattern" value="[%d{HH:mm:ss:SSS}] [%p] - %l - %m%n"/>
-        <!-- 保存日志文件目录 -->
-        <!--<Property name="file_path" value="${sys:user.home}/logs"/>-->
-        <Property name="file_path" value="../logs"/>
-        <!-- 日志文件的最大容量，超过该值就进行备份 -->
-        <Property name="file_max_size" value="30MB"/>
-        <!-- 备份的文件夹名称 如下为：2020-02 -->
-        <Property name="backup_folder" value="$${date:yyyy-MM}"/>
-        <!-- 备份文件的后缀，日志文件超过file_max_size会备份到filePattern指定的目录下 -->
-        <Property name="backup_file_suffix" value="-%d{yyyy-MM-dd}-%i.log"/>
-    </properties>
+  <appenders>
+    <console name="Console" target="SYSTEM_OUT">
+      <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      <PatternLayout pattern="${log_pattern}"/>
+    </console>
 
-    <appenders>
-        <!-- <Console name="CONSOLE" target="system_out">
-             <PatternLayout pattern="${PATTERN}" />
-         </Console>-->
-        <!--File name="log" fileName="${file_name}" append="false">
-            <PatternLayout pattern="${log_pattern}"></PatternLayout>
-            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"></ThresholdFilter>
-        </File>
-        <File name="logss" fileName="${file_info}" append="false">
-            <PatternLayout pattern="${log_pattern}"></PatternLayout>
-            <ThresholdFilter level="info" onMatch="ACCEPT" onMismatch="DENY"></ThresholdFilter>
-        </File-->
+    <RollingFile name="RollingFileInfo" fileName="${file_path}/info.log"
+      filePattern="${file_path}/${backup_folder}/info${backup_file_suffix}">
+      <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
+      <PatternLayout pattern="${log_pattern}"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="${file_max_size}"/>
+      </Policies>
+      <DefaultRolloverStrategy max="20"/>
+    </RollingFile>
+  </appenders>
 
-        <!--控制台的输出配置-->
-        <console name="Console" target="SYSTEM_OUT">
-            <!-- 设置控制台只输出INFO及以上级别的信息(onMatch),其他的直接拒绝(onMismatch) -->
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <!--输出日志的格式-->
-            <PatternLayout pattern="${log_pattern}"/>
-        </console>
-        <RollingFile name="RollingFileInfo" fileName="${file_path}/info.log"
-                     filePattern="${file_path}/${backup_folder}/info${backup_file_suffix}">
-            <!--控制台只输出level及以上级别的信息（onMatch），其他的直接拒绝（onMismatch）-->
-            <ThresholdFilter level="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
-            <!-- 写入日志文件的模板 -->
-            <PatternLayout pattern="${log_pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${file_max_size}"/>
-            </Policies>
-            <!-- DefaultRolloverStrategy属性如不设置，则默认为最多同一文件夹下7个文件，超过该数量，会滚动删除前面的记录 -->
-            <DefaultRolloverStrategy max="20"/>
-        </RollingFile>
-
-        <RollingFile name="RollingFileWarn" fileName="${file_path}/warn.log"
-                     filePattern="${file_path}/${backup_folder}/warn${backup_file_suffix}">
-            <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${log_pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${file_max_size}"/>
-            </Policies>
-        </RollingFile>
-
-        <RollingFile name="RollingFileError" fileName="${file_path}/error.log"
-                     filePattern="${file_path}/${backup_folder}/error${backup_file_suffix}">
-            <ThresholdFilter level="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout pattern="${log_pattern}"/>
-            <Policies>
-                <TimeBasedTriggeringPolicy/>
-                <SizeBasedTriggeringPolicy size="${file_max_size}"/>
-            </Policies>
-        </RollingFile>
-    </appenders>
-
-    <loggers>
-        <logger name="com.roncoo.education" level="debug"/>
-        <logger name="org.springframework" level="INFO"/>
-        <root level="info">
-            <appenderref ref="Console"/>
-            <appender-ref ref="RollingFileInfo"/>
-            <appender-ref ref="RollingFileWarn"/>
-            <appender-ref ref="RollingFileError"/>
-        </root>
-    </loggers>
-
+  <loggers>
+    <logger name="com.ancun.chain_storage" level="INFO"/>
+    <root level="info">
+      <appenderref ref="Console"/>
+      <appender-ref ref="RollingFileInfo"/>
+    </root>
+  </loggers>
 </configuration>
