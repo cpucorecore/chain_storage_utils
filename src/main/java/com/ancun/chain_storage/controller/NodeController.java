@@ -282,4 +282,32 @@ public class NodeController {
     resp.setData(nodeAddresses);
     return resp;
   }
+
+  @GetMapping("get_node_can_delete_file_count/{nodeAddress}")
+  public RespBody<String> handleGetNodeCanDeleteFileCount(
+      @PathVariable(value = "nodeAddress") String nodeAddress) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+    NodeStorage nodeStorage = null;
+    try {
+      nodeStorage = blockchainService.loadNodeStorageContract();
+    } catch (ContractException e) {
+      logger.warn("loadNodeStorageContract exception:{}", e.toString());
+      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    BigInteger result;
+    try {
+      result = nodeStorage.getNodeCanDeleteFileCount(nodeAddress);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getNodeCanDeleteFileCount() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(result.toString());
+    return resp;
+  }
 }

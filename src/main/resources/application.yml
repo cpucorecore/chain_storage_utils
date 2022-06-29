@@ -1,6 +1,9 @@
 server:
   port: 50600
   max-http-header-size: 10000000
+  tomcat:
+    remoteip:
+      host-header:
 
 logging:
   config: classpath:log4j2.xml
@@ -29,7 +32,7 @@ settings:
   Replica: 1
   UserInitSpace: 5368709120
 
-resolverAddress: "0xeefc78ca6c054bda36cc691ad88b8019a3a32aa3"
+resolverAddress: "0x678c7f5af8a48a06f4e4076220e4ad9a013b20f7"
 
 chain:
   groupId: 1
