@@ -1,19 +1,17 @@
 package com.ancun.chain_storage.controller;
 
 import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
 
 import com.ancun.chain_storage.contracts.UserStorage;
 import com.ancun.chain_storage.model.RespBody;
-import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import java.math.BigInteger;
 import java.util.List;
-import javax.annotation.Resource;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,20 +22,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
   Logger logger = LoggerFactory.getLogger(UserController.class);
 
-  @Resource private BlockchainService blockchainService;
+  @Autowired private UserStorage userStorage;
 
   @GetMapping("exist/{address}")
   public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Boolean exist = false;
     try {
@@ -56,15 +45,6 @@ public class UserController {
   @GetMapping("get_ext/{address}")
   public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     String ext = null;
     try {
@@ -83,15 +63,6 @@ public class UserController {
   @GetMapping("get_storage_used/{address}")
   public RespBody<String> handleGetStorageUsed(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger used = null;
     try {
@@ -110,15 +81,6 @@ public class UserController {
   @GetMapping("get_storage_total/{address}")
   public RespBody<String> handleGetStorageTotal(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger used = null;
     try {
@@ -138,15 +100,6 @@ public class UserController {
   public RespBody<String> handleGetFileExt(
       @PathVariable(value = "address") String address, @PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     String ext = null;
     try {
@@ -166,15 +119,6 @@ public class UserController {
   public RespBody<String> handleGetFileDuration(
       @PathVariable(value = "address") String address, @PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger duration = null;
     try {
@@ -193,15 +137,6 @@ public class UserController {
   @GetMapping("get_user_count")
   public RespBody<String> handleGetUserCount() {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger number;
     try {
@@ -223,15 +158,6 @@ public class UserController {
       @PathVariable(value = "page_number") BigInteger pageNumber,
       @PathVariable(value = "page_size") BigInteger pageSize) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    UserStorage userStorage = null;
-    try {
-      userStorage = blockchainService.loadUserStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadUserStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Tuple2<List<String>, Boolean> files;
     try {

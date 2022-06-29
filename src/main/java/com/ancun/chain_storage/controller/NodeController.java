@@ -1,21 +1,19 @@
 package com.ancun.chain_storage.controller;
 
 import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
 import static com.ancun.chain_storage.util.CommonUtils.bytesToHexString;
 
 import com.ancun.chain_storage.contracts.NodeStorage;
 import com.ancun.chain_storage.model.RespBody;
-import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Resource;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,23 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/chain_storage/node")
 public class NodeController {
-
   private Logger logger = LoggerFactory.getLogger(NodeController.class);
 
-  @Resource private BlockchainService blockchainService;
+  @Autowired private NodeStorage nodeStorage;
 
   @GetMapping("exist/{address}")
   public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Boolean exist = false;
     try {
@@ -59,15 +47,6 @@ public class NodeController {
   @GetMapping("get_ext/{address}")
   public RespBody<String> handleGetExt(@PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     String ext = null;
     try {
@@ -87,15 +66,6 @@ public class NodeController {
   public RespBody<String> handleGetStorageSpaceInfo(
       @PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger used;
     BigInteger total;
@@ -117,15 +87,6 @@ public class NodeController {
   @GetMapping("get_node_count")
   public RespBody<String> handleGetNodeCount() {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger nodeCount;
     try {
@@ -146,15 +107,6 @@ public class NodeController {
       @PathVariable(value = "pageSize") BigInteger pageSize,
       @PathVariable(value = "pageNumber") BigInteger pageNumber) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Tuple2<List<String>, Boolean> result;
     try {
@@ -174,15 +126,6 @@ public class NodeController {
   public RespBody<String> handleGetCidCount(
       @PathVariable(value = "nodeAddress") String nodeAddress) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger result;
     try {
@@ -202,15 +145,6 @@ public class NodeController {
   public RespBody<String> handleGetNodeCanAddFileCount(
       @PathVariable(value = "nodeAddress") String nodeAddress) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger result;
     try {
@@ -230,14 +164,6 @@ public class NodeController {
   public RespBody<List<String>> handleGetNodeCanAddFileCidHashes(
       @PathVariable(value = "nodeAddress") String nodeAddress) {
     RespBody<List<String>> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return resp;
-    }
 
     List cidHashes;
     try {
@@ -261,14 +187,6 @@ public class NodeController {
   public RespBody<List<String>> handleGetCanAddFileNodeAddresses(
       @PathVariable(value = "cid") String cid) {
     RespBody<List<String>> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return resp;
-    }
 
     List nodeAddresses;
     try {
@@ -287,15 +205,6 @@ public class NodeController {
   public RespBody<String> handleGetNodeCanDeleteFileCount(
       @PathVariable(value = "nodeAddress") String nodeAddress) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    NodeStorage nodeStorage = null;
-    try {
-      nodeStorage = blockchainService.loadNodeStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadNodeStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger result;
     try {

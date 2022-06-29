@@ -1,20 +1,17 @@
 package com.ancun.chain_storage.controller;
 
 import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
 import static org.fisco.bcos.sdk.utils.ByteUtils.hexStringToBytes;
 
-import com.ancun.chain_storage.contracts.FileManager;
 import com.ancun.chain_storage.contracts.FileStorage;
 import com.ancun.chain_storage.model.RespBody;
-import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import java.math.BigInteger;
 import java.util.List;
-import javax.annotation.Resource;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,14 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileController {
   Logger logger = LoggerFactory.getLogger(FileController.class);
 
-  @Resource private BlockchainService blockchainService;
+  @Autowired private FileStorage fileStorage;
 
   @GetMapping("exist/{cid}")
   public RespBody<String> handleExist(@PathVariable(value = "cid") String cid)
       throws ContractException {
     RespBody<String> resp = new RespBody<>(SUCCESS);
 
-    FileStorage fileStorage = blockchainService.loadFileStorageContract();
     Boolean exist = fileStorage.exist(cid);
 
     resp.setData(exist.toString());
@@ -42,19 +38,10 @@ public class FileController {
   @GetMapping("get_status/{cid}")
   public RespBody<String> handleGetStatus(@PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileManager fileManager = null;
-    try {
-      fileManager = blockchainService.loadFileContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger status;
     try {
-      status = fileManager.getStatus(cid);
+      status = fileStorage.getStatus(cid);
     } catch (ContractException e) {
       logger.warn("file.getSize({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -69,15 +56,6 @@ public class FileController {
   @GetMapping("get_replica/{cid}")
   public RespBody<String> handleGetReplica(@PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger replica;
     try {
@@ -96,15 +74,6 @@ public class FileController {
   @GetMapping("get_cid/{cidHash}")
   public RespBody<String> handleGetCid(@PathVariable(value = "cidHash") String cidHash) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     String cid;
     try {
@@ -123,19 +92,10 @@ public class FileController {
   @GetMapping("get_size/{cid}")
   public RespBody<String> handleGetSize(@PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileManager fileManager = null;
-    try {
-      fileManager = blockchainService.loadFileContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger size;
     try {
-      size = fileManager.getSize(cid);
+      size = fileStorage.getSize(cid);
     } catch (ContractException e) {
       logger.warn("file.getSize({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -151,15 +111,6 @@ public class FileController {
   public RespBody<String> handleUserExist(
       @PathVariable(value = "cid") String cid, @PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Boolean userExist;
     try {
@@ -178,15 +129,6 @@ public class FileController {
   @GetMapping("get_users/{cid}")
   public RespBody<String> handleGetUsers(@PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     List<String> users;
     try {
@@ -206,15 +148,6 @@ public class FileController {
   public RespBody<String> handleNodeExist(
       @PathVariable(value = "cid") String cid, @PathVariable(value = "address") String address) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     Boolean nodeExist;
     try {
@@ -233,15 +166,6 @@ public class FileController {
   @GetMapping("get_nodes/{cid}")
   public RespBody<String> handleGetNodes(@PathVariable(value = "cid") String cid) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     List<String> nodes;
     try {
@@ -260,15 +184,6 @@ public class FileController {
   @GetMapping("get_total_size")
   public RespBody<String> handleGetTotalSize() {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger totalSize;
     try {
@@ -287,15 +202,6 @@ public class FileController {
   @GetMapping("get_file_count")
   public RespBody<String> handleGetFileCount() {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    FileStorage fileStorage = null;
-    try {
-      fileStorage = blockchainService.loadFileStorageContract();
-    } catch (ContractException e) {
-      logger.warn("loadFileStorageContract exception:{}", e.toString());
-      resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      resp.setData(e.getMessage());
-      return resp;
-    }
 
     BigInteger fileCount;
     try {
