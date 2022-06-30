@@ -38,7 +38,7 @@
       <directory>target/appassembler/conf</directory>
       <outputDirectory>conf</outputDirectory>
       <includes>
-        <include>application.properties</include>
+        <include>application.yml</include>
         <include>config.toml</include>
         <include>log4j2.xml</include>
       </includes>

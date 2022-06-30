@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/chain_storage/setting")
 public class SettingController {
+  private Logger logger = LoggerFactory.getLogger(SettingController.class);
+
   public static final String Replica = "Replica";
   public static final String InitSpace = "InitSpace";
   public static final String AdminAccount = "AdminAccount";
@@ -33,7 +35,6 @@ public class SettingController {
   public static final String MaxCidLength = "MaxCidLength";
   public static final String MaxNodeCanAddFileCount = "MaxNodeCanAddFileCount";
   public static final String MaxNodeCanDeleteFileCount = "MaxNodeCanDeleteFileCount";
-  private Logger logger = LoggerFactory.getLogger(SettingController.class);
 
   @Value("${passwd}")
   private String passwd;
@@ -142,7 +143,7 @@ public class SettingController {
       return new RespBody<>(CALL_CONTRACT_FAILED);
     }
 
-    if (AdminAccount == key) {
+    if (key.equals(AdminAccount)) {
       return new RespBody<>(SUCCESS, admin);
     } else {
       return new RespBody<>(SUCCESS, value.toString());
