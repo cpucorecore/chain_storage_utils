@@ -4,6 +4,7 @@ import static com.ancun.chain_storage.constants.Response.CALL_CONTRACT_FAILED;
 import static com.ancun.chain_storage.constants.Response.SUCCESS;
 
 import com.ancun.chain_storage.config.ContractConfig;
+import com.ancun.chain_storage.config.KeyPairLoader;
 import com.ancun.chain_storage.constants.Response;
 import com.ancun.chain_storage.contracts.ChainStorage;
 import com.ancun.chain_storage.requests.NodeRegisterRequest;
@@ -17,7 +18,6 @@ import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,18 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChainStorageController {
   private Logger logger = LoggerFactory.getLogger(ChainStorageController.class);
 
-  @Value("${passwd}")
-  private String passwd;
-
   @Autowired private Client client;
+  @Autowired private KeyPairLoader keyPairLoader;
   @Autowired private ContractConfig contractConfig;
-  @Autowired TransactionDecoderService decoder;
-
-  private CryptoKeyPair loadKeyPair(String address) {
-    String filePath = client.getCryptoSuite().getCryptoKeyPair().getP12KeyStoreFilePath(address);
-    client.getCryptoSuite().loadAccount("p12", filePath, passwd);
-    return client.getCryptoSuite().getCryptoKeyPair();
-  }
+  @Autowired private TransactionDecoderService transactionDecoderService;
 
   @PostMapping("node_register/{nodeAddress}")
   public RespBody<String> handleNodeRegister(
@@ -52,7 +44,7 @@ public class ChainStorageController {
       return new RespBody<>(Response.INVALID_REQUEST);
     }
 
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
@@ -73,7 +65,7 @@ public class ChainStorageController {
   public RespBody<String> handleNodeSetExt(
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "ext") String ext) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
@@ -95,7 +87,7 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid,
       @PathVariable(value = "size") BigInteger size) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanAddFile(cid, size);
@@ -116,7 +108,7 @@ public class ChainStorageController {
   public RespBody<String> handleNodeAddFile(
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeAddFile(cid);
@@ -137,7 +129,7 @@ public class ChainStorageController {
   public RespBody<String> handleNodeCanDeleteFile(
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanDeleteFile(cid);
@@ -158,7 +150,7 @@ public class ChainStorageController {
   public RespBody<String> handleNodeDeleteFile(
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeDeleteFile(cid);
@@ -179,7 +171,7 @@ public class ChainStorageController {
   public RespBody<String> handleNodeChangeNodeSpace(
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "space") BigInteger space) {
-    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetStorageTotal(space);
@@ -201,7 +193,7 @@ public class ChainStorageController {
   public RespBody<String> handleUserRegister(
       @PathVariable(value = "userAddress") String userAddress,
       @PathVariable(value = "ext") String ext) {
-    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userRegister(ext);
@@ -222,7 +214,7 @@ public class ChainStorageController {
   public RespBody<String> handleUserAddFile(
       @PathVariable(value = "userAddress") String userAddress,
       @RequestBody UserAddFileRequest request) {
-    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt =
@@ -244,7 +236,7 @@ public class ChainStorageController {
   public RespBody<String> handleUserDeleteFile(
       @PathVariable(value = "userAddress") String userAddress,
       @PathVariable(value = "cid") String cid) {
-    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
@@ -272,7 +264,8 @@ public class ChainStorageController {
   }
 
   private String getReceiptReturnMessage(TransactionReceipt receipt) {
-    TransactionResponse transactionResponse = decoder.decodeReceiptStatus(receipt);
+    TransactionResponse transactionResponse =
+        transactionDecoderService.decodeReceiptStatus(receipt);
     return transactionResponse.getReturnMessage();
   }
 }

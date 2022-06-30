@@ -5,16 +5,15 @@ import static com.ancun.chain_storage.constants.Response.SUCCESS;
 import static com.ancun.chain_storage.constants.Response.UNKNOWN_SETTING_KEY;
 
 import com.ancun.chain_storage.config.ContractConfig;
+import com.ancun.chain_storage.config.KeyPairLoader;
 import com.ancun.chain_storage.contracts.Setting;
 import java.math.BigInteger;
-import org.fisco.bcos.sdk.client.Client;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -36,17 +35,8 @@ public class SettingController {
   public static final String MaxNodeCanAddFileCount = "MaxNodeCanAddFileCount";
   public static final String MaxNodeCanDeleteFileCount = "MaxNodeCanDeleteFileCount";
 
-  @Value("${passwd}")
-  private String passwd;
-
-  @Autowired private Client client;
+  @Autowired private KeyPairLoader keyPairLoader;
   @Autowired private ContractConfig contractConfig;
-
-  private CryptoKeyPair loadKeyPair(String address) {
-    String filePath = client.getCryptoSuite().getCryptoKeyPair().getP12KeyStoreFilePath(address);
-    client.getCryptoSuite().loadAccount("p12", filePath, passwd);
-    return client.getCryptoSuite().getCryptoKeyPair();
-  }
 
   @PutMapping("/{deployerAddress}/{key}/{value}")
   public RespBody<String> set(
@@ -54,7 +44,7 @@ public class SettingController {
       @PathVariable(value = "key") String key,
       @PathVariable(value = "value") String value) {
 
-    CryptoKeyPair keyPair = loadKeyPair(deployerAddress);
+    CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(deployerAddress);
     Setting setting = contractConfig.setting(keyPair);
 
     TransactionReceipt receipt = null;
