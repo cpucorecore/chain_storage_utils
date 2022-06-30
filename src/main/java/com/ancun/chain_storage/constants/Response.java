@@ -1,8 +1,9 @@
 package com.ancun.chain_storage.constants;
 
-public enum ResponseInfo {
+public enum Response {
   SUCCESS(0, "成功"),
-  INVALID_ACCOUNT(100, "invalid account"),
+  CREATE_ACCOUNT_FAIL(100, "create account fail"),
+  INVALID_ACCOUNT(101, "invalid account"),
   GET_CHAIN_ACCOUNT_FAILED(101, "get chain account failed"),
   INVALID_REQUEST(200, "invalid request"),
   DEPLOY_CONTRACT_FAILED(300, "deploy contract failed"),
@@ -14,7 +15,7 @@ public enum ResponseInfo {
   private int code;
   private String msg;
 
-  ResponseInfo(int code, String msg) {
+  Response(int code, String msg) {
     this.code = code;
     this.msg = msg;
   }

@@ -1,11 +1,10 @@
 package com.ancun.chain_storage.controller;
 
-import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
+import static com.ancun.chain_storage.constants.Response.CALL_CONTRACT_FAILED;
+import static com.ancun.chain_storage.constants.Response.SUCCESS;
 import static org.fisco.bcos.sdk.utils.ByteUtils.hexStringToBytes;
 
-import com.ancun.chain_storage.contracts.FileStorage;
-import com.ancun.chain_storage.model.RespBody;
+import com.ancun.chain_storage.config.ContractConfig;
 import java.math.BigInteger;
 import java.util.List;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
@@ -22,14 +21,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class FileController {
   Logger logger = LoggerFactory.getLogger(FileController.class);
 
-  @Autowired private FileStorage fileStorage;
+  @Autowired private ContractConfig contractConfig;
 
   @GetMapping("exist/{cid}")
   public RespBody<String> handleExist(@PathVariable(value = "cid") String cid)
       throws ContractException {
     RespBody<String> resp = new RespBody<>(SUCCESS);
 
-    Boolean exist = fileStorage.exist(cid);
+    Boolean exist = contractConfig.fileStorage().exist(cid);
 
     resp.setData(exist.toString());
     return resp;
@@ -41,7 +40,7 @@ public class FileController {
 
     BigInteger status;
     try {
-      status = fileStorage.getStatus(cid);
+      status = contractConfig.fileStorage().getStatus(cid);
     } catch (ContractException e) {
       logger.warn("file.getSize({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -59,7 +58,7 @@ public class FileController {
 
     BigInteger replica;
     try {
-      replica = fileStorage.getReplica(cid);
+      replica = contractConfig.fileStorage().getReplica(cid);
     } catch (ContractException e) {
       logger.warn("fileStorage.getReplica({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -77,7 +76,7 @@ public class FileController {
 
     String cid;
     try {
-      cid = fileStorage.getCid(hexStringToBytes(cidHash));
+      cid = contractConfig.fileStorage().getCid(hexStringToBytes(cidHash));
     } catch (ContractException e) {
       logger.warn("fileStorage.cid({}) exception:{}", cidHash, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -95,7 +94,7 @@ public class FileController {
 
     BigInteger size;
     try {
-      size = fileStorage.getSize(cid);
+      size = contractConfig.fileStorage().getSize(cid);
     } catch (ContractException e) {
       logger.warn("file.getSize({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -114,7 +113,7 @@ public class FileController {
 
     Boolean userExist;
     try {
-      userExist = fileStorage.userExist(cid, address);
+      userExist = contractConfig.fileStorage().userExist(cid, address);
     } catch (ContractException e) {
       logger.warn("fileStorage.userExist({}, {}) exception:{}", cid, address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -132,7 +131,7 @@ public class FileController {
 
     List<String> users;
     try {
-      users = fileStorage.getUsers(cid);
+      users = contractConfig.fileStorage().getUsers(cid);
     } catch (ContractException e) {
       logger.warn("fileStorage.getUsers({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -151,7 +150,7 @@ public class FileController {
 
     Boolean nodeExist;
     try {
-      nodeExist = fileStorage.nodeExist(cid, address);
+      nodeExist = contractConfig.fileStorage().nodeExist(cid, address);
     } catch (ContractException e) {
       logger.warn("fileStorage.nodeExist({}, {}) exception:{}", cid, address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -169,7 +168,7 @@ public class FileController {
 
     List<String> nodes;
     try {
-      nodes = fileStorage.getNodes(cid);
+      nodes = contractConfig.fileStorage().getNodes(cid);
     } catch (ContractException e) {
       logger.warn("fileStorage.getNodes({}) exception:{}", cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -187,7 +186,7 @@ public class FileController {
 
     BigInteger totalSize;
     try {
-      totalSize = fileStorage.getTotalSize();
+      totalSize = contractConfig.fileStorage().getTotalSize();
     } catch (ContractException e) {
       logger.warn("fileStorage.getTotalSize() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -205,7 +204,7 @@ public class FileController {
 
     BigInteger fileCount;
     try {
-      fileCount = fileStorage.getFileCount();
+      fileCount = contractConfig.fileStorage().getFileCount();
     } catch (ContractException e) {
       logger.warn("fileStorage.getFileCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);

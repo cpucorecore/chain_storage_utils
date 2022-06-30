@@ -1,6 +1,6 @@
-package com.ancun.chain_storage.config;
+package com.ancun.chain_storage.constants;
 
-public class Constants {
+public class ContractName {
   public static byte[] String2SolidityBytes32(String value) {
     byte[] valueBytes = value.getBytes();
     byte[] targetBytes = new byte[32];
@@ -33,4 +33,5 @@ public class Constants {
   public static final byte[] UserStorageBytes32 = String2SolidityBytes32(CN_UserStorage);
   public static final byte[] FileManagerBytes32 = String2SolidityBytes32(CN_FileManager);
   public static final byte[] FileStorageBytes32 = String2SolidityBytes32(CN_FileStorage);
+  public static final byte[] AdminBytes32 = String2SolidityBytes32(Account_Admin);
 }

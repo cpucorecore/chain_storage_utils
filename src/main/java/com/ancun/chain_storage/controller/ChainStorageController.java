@@ -1,37 +1,27 @@
 package com.ancun.chain_storage.controller;
 
-import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.DEPLOY_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.GET_CHAIN_ACCOUNT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.INVALID_ACCOUNT;
-import static com.ancun.chain_storage.constants.ResponseInfo.LOAD_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
-import static com.ancun.chain_storage.requests.RequestUtils.parseChainAccountInfo;
+import static com.ancun.chain_storage.constants.Response.CALL_CONTRACT_FAILED;
+import static com.ancun.chain_storage.constants.Response.SUCCESS;
 
-import com.ancun.chain_storage.constants.ResponseInfo;
+import com.ancun.chain_storage.config.ContractConfig;
+import com.ancun.chain_storage.constants.Response;
 import com.ancun.chain_storage.contracts.ChainStorage;
-import com.ancun.chain_storage.model.RespBody;
-import com.ancun.chain_storage.requests.ChainAccountInfo;
-import com.ancun.chain_storage.requests.DeployCSContractRequest;
 import com.ancun.chain_storage.requests.NodeRegisterRequest;
 import com.ancun.chain_storage.requests.UserAddFileRequest;
-import com.ancun.chain_storage.service_account.AccountService;
-import com.ancun.chain_storage.service_account.impl.ChainAccount;
-import com.ancun.chain_storage.service_blockchain.BlockchainService;
 import java.math.BigInteger;
-import java.util.Map;
-import javax.annotation.Resource;
+import org.fisco.bcos.sdk.client.Client;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
+import org.fisco.bcos.sdk.transaction.codec.decode.TransactionDecoderService;
 import org.fisco.bcos.sdk.transaction.model.dto.TransactionResponse;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,65 +30,30 @@ import org.springframework.web.bind.annotation.RestController;
 public class ChainStorageController {
   private Logger logger = LoggerFactory.getLogger(ChainStorageController.class);
 
-  @Resource private BlockchainService blockchainService;
-  @Resource private AccountService accountService;
+  @Value("${passwd}")
+  private String passwd;
 
-  @PostMapping("/deploy_contract")
-  public RespBody<String> deployContract(@RequestHeader String chainAccountInfo) {
-    KeyPairWrap warp = prepareKeyPair(chainAccountInfo);
-    if (0 != warp.resp.getCode()) {
-      logger.error(warp.resp.toString());
-      return warp.resp;
-    }
+  @Autowired private Client client;
+  @Autowired private ContractConfig contractConfig;
+  @Autowired TransactionDecoderService decoder;
 
-    Map<String, String> contractAddresses;
-    try {
-      contractAddresses = blockchainService.deployCSContracts(warp.keyPair);
-      warp.resp.setData(contractAddresses.toString());
-    } catch (Exception e) {
-      warp.resp.setResponseInfo(DEPLOY_CONTRACT_FAILED);
-      warp.resp.setData(e.getMessage());
-    }
-
-    return warp.resp;
+  private CryptoKeyPair loadKeyPair(String address) {
+    String filePath = client.getCryptoSuite().getCryptoKeyPair().getP12KeyStoreFilePath(address);
+    client.getCryptoSuite().loadAccount("p12", filePath, passwd);
+    return client.getCryptoSuite().getCryptoKeyPair();
   }
 
-  @PutMapping("resolver/{address}")
-  public RespBody<String> setResolver(@PathVariable(value = "address") String address) {
-    blockchainService.setResolverAddress(address);
-    return new RespBody<>(SUCCESS);
-  }
-
-  @GetMapping("resolver")
-  public RespBody<String> getResolver() {
-    RespBody<String> response = new RespBody<>(SUCCESS, blockchainService.getResolverAddress());
-    return response;
-  }
-
-  @PostMapping("node_register")
+  @PostMapping("node_register/{nodeAddress}")
   public RespBody<String> handleNodeRegister(
-      @RequestHeader String chainAccountInfo, @RequestBody NodeRegisterRequest request) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @RequestBody NodeRegisterRequest request) {
 
     if (false == request.check()) {
-      wrap.resp.setResponseInfo(ResponseInfo.INVALID_REQUEST);
-      return wrap.resp;
+      return new RespBody<>(Response.INVALID_REQUEST);
     }
 
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
     if (!receipt.isStatusOK()) {
@@ -108,34 +63,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_set_ext/{ext}")
+  @PostMapping("node_set_ext/{nodeAddress}/{ext}")
   public RespBody<String> handleNodeSetExt(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "ext") String ext) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @PathVariable(value = "ext") String ext) {
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
     if (!receipt.isStatusOK()) {
@@ -144,37 +83,20 @@ public class ChainStorageController {
               + getReceiptReturnMessage(receipt)
               + ", txHash:"
               + receipt.getTransactionHash();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      logger.error(msg);
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_can_add_file/{cid}/{size}")
+  @PostMapping("node_can_add_file/{nodeAddress}/{cid}/{size}")
   public RespBody<String> handleNodeCanAddFile(
-      @RequestHeader String chainAccountInfo,
+      @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid,
       @PathVariable(value = "size") BigInteger size) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanAddFile(cid, size);
     if (!receipt.isStatusOK()) {
@@ -184,34 +106,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_add_file/{cid}")
+  @PostMapping("node_add_file/{nodeAddress}/{cid}")
   public RespBody<String> handleNodeAddFile(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @PathVariable(value = "cid") String cid) {
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeAddFile(cid);
     if (!receipt.isStatusOK()) {
@@ -221,34 +127,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_can_delete_file/{cid}")
+  @PostMapping("node_can_delete_file/{nodeAddress}/{cid}")
   public RespBody<String> handleNodeCanDeleteFile(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @PathVariable(value = "cid") String cid) {
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanDeleteFile(cid);
     if (!receipt.isStatusOK()) {
@@ -258,34 +148,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_delete_file/{cid}")
+  @PostMapping("node_delete_file/{nodeAddress}/{cid}")
   public RespBody<String> handleNodeDeleteFile(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @PathVariable(value = "cid") String cid) {
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeDeleteFile(cid);
     if (!receipt.isStatusOK()) {
@@ -295,34 +169,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("node_change_node_space/{space}")
+  @PostMapping("node_change_node_space/{nodeAddress}/{space}")
   public RespBody<String> handleNodeChangeNodeSpace(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "space") BigInteger space) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "nodeAddress") String nodeAddress,
+      @PathVariable(value = "space") BigInteger space) {
+    CryptoKeyPair keyPair = loadKeyPair(nodeAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetStorageTotal(space);
     if (!receipt.isStatusOK()) {
@@ -332,35 +190,19 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
   // User
-  @PostMapping("user_register/{ext}")
+  @PostMapping("user_register/{userAddress}/{ext}")
   public RespBody<String> handleUserRegister(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "ext") String ext) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "userAddress") String userAddress,
+      @PathVariable(value = "ext") String ext) {
+    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userRegister(ext);
     if (!receipt.isStatusOK()) {
@@ -370,34 +212,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
   @PostMapping("user_add_file")
   public RespBody<String> handleUserAddFile(
-      @RequestHeader String chainAccountInfo, @RequestBody UserAddFileRequest request) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "userAddress") String userAddress,
+      @RequestBody UserAddFileRequest request) {
+    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt =
         chainStorage.userAddFile(request.getCid(), request.getDuration(), request.getExt());
@@ -408,34 +234,18 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
-  @PostMapping("user_delete_file/{cid}")
+  @PostMapping("user_delete_file/{userAddress}/{cid}")
   public RespBody<String> handleUserDeleteFile(
-      @RequestHeader String chainAccountInfo, @PathVariable(value = "cid") String cid) {
-    KeyPairWrap wrap = prepareKeyPair(chainAccountInfo);
-    if (wrap.resp.getCode() != ResponseInfo.SUCCESS.getCode()) {
-      logger.error(wrap.resp.toString());
-      return wrap.resp;
-    }
-
-    ChainStorage chainStorage;
-    try {
-      chainStorage = blockchainService.loadChainStorageContract(wrap.keyPair);
-    } catch (ContractException e) {
-      String msg = "loadChainStorageContract Exception:" + e.getMessage();
-      logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(LOAD_CONTRACT_FAILED);
-      return wrap.resp;
-    }
+      @PathVariable(value = "userAddress") String userAddress,
+      @PathVariable(value = "cid") String cid) {
+    CryptoKeyPair keyPair = loadKeyPair(userAddress);
+    ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
     if (!receipt.isStatusOK()) {
@@ -445,57 +255,24 @@ public class ChainStorageController {
               + ", txHash:"
               + receipt.getTransactionHash();
       logger.warn(msg);
-      wrap.resp.setData(msg);
-      wrap.resp.setResponseInfo(CALL_CONTRACT_FAILED);
-      return wrap.resp;
+      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
     }
 
-    wrap.resp.setData(receipt.toString());
-    return wrap.resp;
+    return new RespBody<>(SUCCESS, receipt.toString());
   }
 
   @GetMapping("get_receipt_return_message/{txHash}")
   public RespBody<String> handleParseReceiptMessage(@PathVariable(value = "txHash") String txHash) {
     RespBody<String> resp = new RespBody<>(SUCCESS);
-    String msg = getReceiptReturnMessage(blockchainService.getTransactionReceipt(txHash));
+
+    TransactionReceipt receipt = client.getTransactionReceipt(txHash).getTransactionReceipt().get();
+    String msg = getReceiptReturnMessage(receipt);
     resp.setData(msg);
     return resp;
   }
 
-  private KeyPairWrap prepareKeyPair(String chainAccountInfo) {
-    RespBody<String> resp = new RespBody<>(SUCCESS);
-    KeyPairWrap keyPairWrap = new KeyPairWrap(null, resp);
-
-    ChainAccountInfo accountInfo;
-    try {
-      accountInfo = parseChainAccountInfo(chainAccountInfo);
-    } catch (Exception e) {
-      resp.setResponseInfo(INVALID_ACCOUNT);
-      resp.setData(e.getMessage());
-      logger.error(resp.toString());
-      return keyPairWrap;
-    }
-
-    String address = accountInfo.getAddress();
-    String password = accountInfo.getPassword();
-
-    ChainAccount chainAccount;
-    try {
-      chainAccount = accountService.getChainAccount(address, password);
-    } catch (Exception e) {
-      resp.setResponseInfo(GET_CHAIN_ACCOUNT_FAILED);
-      resp.setData(e.getMessage());
-      logger.error(resp.toString());
-      return keyPairWrap;
-    }
-
-    keyPairWrap.keyPair = chainAccount.getCryptoKeyPair();
-    return keyPairWrap;
-  }
-
   private String getReceiptReturnMessage(TransactionReceipt receipt) {
-    TransactionResponse transactionResponse =
-        blockchainService.getDecoder().decodeReceiptStatus(receipt);
+    TransactionResponse transactionResponse = decoder.decodeReceiptStatus(receipt);
     return transactionResponse.getReturnMessage();
   }
 }

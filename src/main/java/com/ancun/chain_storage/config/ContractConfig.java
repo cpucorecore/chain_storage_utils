@@ -1,74 +1,87 @@
 package com.ancun.chain_storage.config;
 
-import static com.ancun.chain_storage.config.Constants.FileStorageBytes32;
-import static com.ancun.chain_storage.config.Constants.NodeManagerBytes32;
-import static com.ancun.chain_storage.config.Constants.NodeStorageBytes32;
-import static com.ancun.chain_storage.config.Constants.UserStorageBytes32;
+import static com.ancun.chain_storage.constants.ContractName.ChainStorageBytes32;
+import static com.ancun.chain_storage.constants.ContractName.FileStorageBytes32;
+import static com.ancun.chain_storage.constants.ContractName.NodeStorageBytes32;
+import static com.ancun.chain_storage.constants.ContractName.SettingBytes32;
+import static com.ancun.chain_storage.constants.ContractName.UserStorageBytes32;
 
+import com.ancun.chain_storage.contracts.ChainStorage;
 import com.ancun.chain_storage.contracts.FileStorage;
-import com.ancun.chain_storage.contracts.NodeManager;
 import com.ancun.chain_storage.contracts.NodeStorage;
-import com.ancun.chain_storage.contracts.Resolver;
+import com.ancun.chain_storage.contracts.Setting;
 import com.ancun.chain_storage.contracts.UserStorage;
 import org.fisco.bcos.sdk.client.Client;
-import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@AutoConfigureAfter(ResolverConfig.class)
 public class ContractConfig {
-  Logger logger = LoggerFactory.getLogger(ContractConfig.class);
-
   @Autowired private ResolverConfig resolverConfig;
-
-  @Autowired private Resolver resolver;
 
   @Autowired private Client client;
 
-  @Bean
-  public NodeManager nodeManager() {
-    try {
-      String address = resolver.getAddress(NodeManagerBytes32);
-      return NodeManager.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
-    } catch (ContractException e) {
-      logger.error("{}", e);
-      return null;
+  private ChainStorage chainStorage;
+  private Setting setting;
+  private NodeStorage nodeStorage;
+  private FileStorage fileStorage;
+  private UserStorage userStorage;
+
+  public ChainStorage chainStorage(CryptoKeyPair keyPair) {
+    String address = resolverConfig.getAddress(ChainStorageBytes32);
+    if (null == chainStorage
+        || !chainStorage.getContractAddress().equals(address)
+        || !chainStorage.getCurrentExternalAccountAddress().equals(keyPair.getAddress())) {
+      chainStorage = ChainStorage.load(address, client, keyPair);
     }
+
+    return chainStorage;
   }
 
-  @Bean
+  public Setting setting() {
+    String address = resolverConfig.getAddress(SettingBytes32);
+    if (null == setting || !setting.getContractAddress().equals(address)) {
+      setting = Setting.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
+    }
+
+    return setting;
+  }
+
+  public Setting setting(CryptoKeyPair keyPair) {
+    String address = resolverConfig.getAddress(SettingBytes32);
+    if (null == setting
+        || !setting.getContractAddress().equals(address)
+        || !setting.getCurrentExternalAccountAddress().equals(keyPair.getAddress())) {
+      setting = Setting.load(address, client, keyPair);
+    }
+
+    return setting;
+  }
+
   public NodeStorage nodeStorage() {
-    try {
-      String address = resolver.getAddress(NodeStorageBytes32);
-      return NodeStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
-    } catch (ContractException e) {
-      logger.error("{}", e);
-      return null;
+    String address = resolverConfig.getAddress(NodeStorageBytes32);
+    if (null == nodeStorage || !nodeStorage.getContractAddress().equals(address)) {
+      nodeStorage = NodeStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
     }
+    return nodeStorage;
   }
 
-  @Bean
   public UserStorage userStorage() {
-    try {
-      String address = resolver.getAddress(UserStorageBytes32);
-      return UserStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
-    } catch (ContractException e) {
-      logger.error("{}", e);
-      return null;
+    String address = resolverConfig.getAddress(UserStorageBytes32);
+    if (null == userStorage || !userStorage.getContractAddress().equals(address)) {
+      userStorage = UserStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
     }
+    return userStorage;
   }
 
-  @Bean
   public FileStorage fileStorage() {
-    try {
-      String address = resolver.getAddress(FileStorageBytes32);
-      return FileStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
-    } catch (ContractException e) {
-      logger.error("{}", e);
-      return null;
+    String address = resolverConfig.getAddress(FileStorageBytes32);
+    if (null == fileStorage || !fileStorage.getContractAddress().equals(address)) {
+      fileStorage = FileStorage.load(address, client, client.getCryptoSuite().getCryptoKeyPair());
     }
+    return fileStorage;
   }
 }

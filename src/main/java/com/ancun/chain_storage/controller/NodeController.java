@@ -1,11 +1,10 @@
 package com.ancun.chain_storage.controller;
 
-import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
+import static com.ancun.chain_storage.constants.Response.CALL_CONTRACT_FAILED;
+import static com.ancun.chain_storage.constants.Response.SUCCESS;
 import static com.ancun.chain_storage.util.CommonUtils.bytesToHexString;
 
-import com.ancun.chain_storage.contracts.NodeStorage;
-import com.ancun.chain_storage.model.RespBody;
+import com.ancun.chain_storage.config.ContractConfig;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class NodeController {
   private Logger logger = LoggerFactory.getLogger(NodeController.class);
 
-  @Autowired private NodeStorage nodeStorage;
+  @Autowired private ContractConfig contractConfig;
 
   @GetMapping("exist/{address}")
   public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
@@ -32,7 +31,7 @@ public class NodeController {
 
     Boolean exist = false;
     try {
-      exist = nodeStorage.exist(address);
+      exist = contractConfig.nodeStorage().exist(address);
     } catch (ContractException e) {
       logger.warn("nodeStorage.exist({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -50,7 +49,7 @@ public class NodeController {
 
     String ext = null;
     try {
-      ext = nodeStorage.getExt(address);
+      ext = contractConfig.nodeStorage().getExt(address);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getExt({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -70,8 +69,8 @@ public class NodeController {
     BigInteger used;
     BigInteger total;
     try {
-      used = nodeStorage.getStorageUsed(address);
-      total = nodeStorage.getStorageTotal(address);
+      used = contractConfig.nodeStorage().getStorageUsed(address);
+      total = contractConfig.nodeStorage().getStorageTotal(address);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getStorageSpaceInfo({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -90,7 +89,7 @@ public class NodeController {
 
     BigInteger nodeCount;
     try {
-      nodeCount = nodeStorage.getNodeCount();
+      nodeCount = contractConfig.nodeStorage().getNodeCount();
     } catch (ContractException e) {
       logger.warn("nodeStorage.getNodeCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -110,7 +109,7 @@ public class NodeController {
 
     Tuple2<List<String>, Boolean> result;
     try {
-      result = nodeStorage.getAllNodeAddresses(pageSize, pageNumber);
+      result = contractConfig.nodeStorage().getAllNodeAddresses(pageSize, pageNumber);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getAllNodeAddresses() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -129,7 +128,7 @@ public class NodeController {
 
     BigInteger result;
     try {
-      result = nodeStorage.getCidCount(nodeAddress);
+      result = contractConfig.nodeStorage().getCidCount(nodeAddress);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getCidCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -148,7 +147,7 @@ public class NodeController {
 
     BigInteger result;
     try {
-      result = nodeStorage.getNodeCanAddFileCount(nodeAddress);
+      result = contractConfig.nodeStorage().getNodeCanAddFileCount(nodeAddress);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getNodeCanAddFileCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -167,7 +166,7 @@ public class NodeController {
 
     List cidHashes;
     try {
-      cidHashes = nodeStorage.getNodeCanAddFileCidHashes(nodeAddress);
+      cidHashes = contractConfig.nodeStorage().getNodeCanAddFileCidHashes(nodeAddress);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getNodeCanAddFileCidHashes() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -190,7 +189,7 @@ public class NodeController {
 
     List nodeAddresses;
     try {
-      nodeAddresses = nodeStorage.getCanAddFileNodeAddresses(cid);
+      nodeAddresses = contractConfig.nodeStorage().getCanAddFileNodeAddresses(cid);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getCanAddFileNodeAddresses() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -208,7 +207,7 @@ public class NodeController {
 
     BigInteger result;
     try {
-      result = nodeStorage.getNodeCanDeleteFileCount(nodeAddress);
+      result = contractConfig.nodeStorage().getNodeCanDeleteFileCount(nodeAddress);
     } catch (ContractException e) {
       logger.warn("nodeStorage.getNodeCanDeleteFileCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);

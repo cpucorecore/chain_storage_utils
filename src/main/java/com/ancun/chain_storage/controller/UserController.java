@@ -1,10 +1,9 @@
 package com.ancun.chain_storage.controller;
 
-import static com.ancun.chain_storage.constants.ResponseInfo.CALL_CONTRACT_FAILED;
-import static com.ancun.chain_storage.constants.ResponseInfo.SUCCESS;
+import static com.ancun.chain_storage.constants.Response.CALL_CONTRACT_FAILED;
+import static com.ancun.chain_storage.constants.Response.SUCCESS;
 
-import com.ancun.chain_storage.contracts.UserStorage;
-import com.ancun.chain_storage.model.RespBody;
+import com.ancun.chain_storage.config.ContractConfig;
 import java.math.BigInteger;
 import java.util.List;
 import org.fisco.bcos.sdk.abi.datatypes.generated.tuples.generated.Tuple2;
@@ -22,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
   Logger logger = LoggerFactory.getLogger(UserController.class);
 
-  @Autowired private UserStorage userStorage;
+  @Autowired private ContractConfig contractConfig;
 
   @GetMapping("exist/{address}")
   public RespBody<String> handleExist(@PathVariable(value = "address") String address) {
@@ -30,7 +29,7 @@ public class UserController {
 
     Boolean exist = false;
     try {
-      exist = userStorage.exist(address);
+      exist = contractConfig.userStorage().exist(address);
     } catch (ContractException e) {
       logger.warn("userStorage.exist({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -48,7 +47,7 @@ public class UserController {
 
     String ext = null;
     try {
-      ext = userStorage.getExt(address);
+      ext = contractConfig.userStorage().getExt(address);
     } catch (ContractException e) {
       logger.warn("userStorage.getExt({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -66,7 +65,7 @@ public class UserController {
 
     BigInteger used = null;
     try {
-      used = userStorage.getStorageUsed(address);
+      used = contractConfig.userStorage().getStorageUsed(address);
     } catch (ContractException e) {
       logger.warn("userStorage.getStorageUsed({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -84,7 +83,7 @@ public class UserController {
 
     BigInteger used = null;
     try {
-      used = userStorage.getStorageTotal(address);
+      used = contractConfig.userStorage().getStorageTotal(address);
     } catch (ContractException e) {
       logger.warn("userStorage.getStorageTotal({}) exception:{}", address, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -103,7 +102,7 @@ public class UserController {
 
     String ext = null;
     try {
-      ext = userStorage.getFileExt(address, cid);
+      ext = contractConfig.userStorage().getFileExt(address, cid);
     } catch (ContractException e) {
       logger.warn("userStorage.getFileExt({}, {}) exception:{}", address, cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -122,7 +121,7 @@ public class UserController {
 
     BigInteger duration = null;
     try {
-      duration = userStorage.getFileDuration(address, cid);
+      duration = contractConfig.userStorage().getFileDuration(address, cid);
     } catch (ContractException e) {
       logger.warn("userStorage.getFileDuration({}, {}) exception:{}", address, cid, e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -140,7 +139,7 @@ public class UserController {
 
     BigInteger number;
     try {
-      number = userStorage.getUserCount();
+      number = contractConfig.userStorage().getUserCount();
     } catch (ContractException e) {
       logger.warn("userStorage.getUserCount() exception:{}", e.toString());
       resp.setResponseInfo(CALL_CONTRACT_FAILED);
@@ -161,7 +160,7 @@ public class UserController {
 
     Tuple2<List<String>, Boolean> files;
     try {
-      files = userStorage.getFiles(address, pageNumber, pageSize);
+      files = contractConfig.userStorage().getFiles(address, pageNumber, pageSize);
     } catch (ContractException e) {
       logger.warn(
           "userStorage.getFiles({}, {}, {}) exception:{}",

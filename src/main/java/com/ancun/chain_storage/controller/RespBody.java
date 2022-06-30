@@ -1,10 +1,10 @@
-package com.ancun.chain_storage.model;
+package com.ancun.chain_storage.controller;
 
-import com.ancun.chain_storage.constants.ResponseInfo;
+import com.ancun.chain_storage.constants.Response;
 
 public class RespBody<T> {
-  private int code = ResponseInfo.SUCCESS.getCode();
-  private String msg = ResponseInfo.SUCCESS.getMsg();
+  private int code;
+  private String msg;
 
   private T data;
 
@@ -13,18 +13,18 @@ public class RespBody<T> {
     this.msg = msg;
   }
 
-  public RespBody(ResponseInfo info, T data) {
+  public RespBody(Response info, T data) {
     this.code = info.getCode();
     this.msg = info.getMsg();
     this.data = data;
   }
 
-  public RespBody(ResponseInfo info) {
+  public RespBody(Response info) {
     this.code = info.getCode();
     this.msg = info.getMsg();
   }
 
-  public void setResponseInfo(ResponseInfo info) {
+  public void setResponseInfo(Response info) {
     this.code = info.getCode();
     this.msg = info.getMsg();
   }
