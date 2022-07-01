@@ -52,13 +52,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeRegister failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -76,13 +70,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeSetExt failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.error(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -101,13 +89,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeCanAddFile(cid, size);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeCanAddFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -125,13 +107,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeAddFile(cid);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeAddFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -149,13 +125,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeCanDeleteFile(cid);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeCanDeleteFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -173,13 +143,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeDeleteFile(cid);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "nodeDeleteFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -197,13 +161,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.nodeSetStorageTotal(space);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "changeNodeSpace failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -222,13 +180,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.userRegister(ext);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "userRegister failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -247,13 +199,7 @@ public class ChainStorageController {
     TransactionReceipt receipt =
         chainStorage.userAddFile(request.getCid(), request.getDuration(), request.getExt());
     if (!receipt.isStatusOK()) {
-      String msg =
-          "userAddFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -271,13 +217,7 @@ public class ChainStorageController {
 
     TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
     if (!receipt.isStatusOK()) {
-      String msg =
-          "userDeleteFile failed:"
-              + getReceiptReturnMessage(receipt)
-              + ", txHash:"
-              + receipt.getTransactionHash();
-      logger.warn(msg);
-      return new RespBody<>(CALL_CONTRACT_FAILED, msg);
+      return receipt2RespBody(receipt);
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -288,14 +228,21 @@ public class ChainStorageController {
     RespBody<String> resp = new RespBody<>(SUCCESS);
 
     TransactionReceipt receipt = client.getTransactionReceipt(txHash).getTransactionReceipt().get();
-    String msg = getReceiptReturnMessage(receipt);
+    String msg = getReceiptErrMessage(receipt);
     resp.setData(msg);
     return resp;
   }
 
-  private String getReceiptReturnMessage(TransactionReceipt receipt) {
+  private String getReceiptErrMessage(TransactionReceipt receipt) {
     TransactionResponse transactionResponse =
         transactionDecoderService.decodeReceiptStatus(receipt);
     return transactionResponse.getReturnMessage();
+  }
+
+  private RespBody receipt2RespBody(TransactionReceipt receipt) {
+    String txHash = receipt.getTransactionHash();
+    String msg = String.format("txHash:%s,err:%s", txHash, getReceiptErrMessage(receipt));
+    logger.warn(msg);
+    return new RespBody<>(CALL_CONTRACT_FAILED, msg);
   }
 }
