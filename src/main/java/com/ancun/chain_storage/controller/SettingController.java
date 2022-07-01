@@ -6,6 +6,7 @@ import static com.ancun.chain_storage.constants.Response.UNKNOWN_SETTING_KEY;
 
 import com.ancun.chain_storage.config.ContractConfig;
 import com.ancun.chain_storage.config.KeyPairLoader;
+import com.ancun.chain_storage.constants.Response;
 import com.ancun.chain_storage.contracts.Setting;
 import java.math.BigInteger;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
@@ -45,6 +46,9 @@ public class SettingController {
       @PathVariable(value = "value") String value) {
 
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(deployerAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, deployerAddress);
+    }
     Setting setting = contractConfig.setting(keyPair);
 
     TransactionReceipt receipt = null;

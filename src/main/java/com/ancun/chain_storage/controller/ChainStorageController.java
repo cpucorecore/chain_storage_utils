@@ -45,6 +45,9 @@ public class ChainStorageController {
     }
 
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeRegister(request.getSpace(), request.getExt());
@@ -66,6 +69,9 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "ext") String ext) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetExt(ext);
@@ -88,6 +94,9 @@ public class ChainStorageController {
       @PathVariable(value = "cid") String cid,
       @PathVariable(value = "size") BigInteger size) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanAddFile(cid, size);
@@ -109,6 +118,9 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeAddFile(cid);
@@ -130,6 +142,9 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeCanDeleteFile(cid);
@@ -151,6 +166,9 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "cid") String cid) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeDeleteFile(cid);
@@ -172,6 +190,9 @@ public class ChainStorageController {
       @PathVariable(value = "nodeAddress") String nodeAddress,
       @PathVariable(value = "space") BigInteger space) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(nodeAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, nodeAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.nodeSetStorageTotal(space);
@@ -194,6 +215,9 @@ public class ChainStorageController {
       @PathVariable(value = "userAddress") String userAddress,
       @PathVariable(value = "ext") String ext) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, userAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userRegister(ext);
@@ -215,6 +239,9 @@ public class ChainStorageController {
       @PathVariable(value = "userAddress") String userAddress,
       @RequestBody UserAddFileRequest request) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, userAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt =
@@ -237,6 +264,9 @@ public class ChainStorageController {
       @PathVariable(value = "userAddress") String userAddress,
       @PathVariable(value = "cid") String cid) {
     CryptoKeyPair keyPair = keyPairLoader.loadKeyPair(userAddress);
+    if (null == keyPair) {
+      return new RespBody<>(Response.LOAD_CHAIN_ACCOUNT_FAILED, userAddress);
+    }
     ChainStorage chainStorage = contractConfig.chainStorage(keyPair);
 
     TransactionReceipt receipt = chainStorage.userDeleteFile(cid);
