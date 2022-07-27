@@ -160,7 +160,7 @@ public class UserController {
 
     Tuple2<List<String>, Boolean> files;
     try {
-      files = contractConfig.userStorage().getFiles(address, pageNumber, pageSize);
+      files = contractConfig.userStorage().getFiles(address, pageSize, pageNumber);
     } catch (ContractException e) {
       logger.warn(
           "userStorage.getFiles({}, {}, {}) exception:{}",
@@ -174,6 +174,26 @@ public class UserController {
     }
 
     resp.setData(files.toString());
+    return resp;
+  }
+
+  @GetMapping("get_user_addresses/{page_number}/{page_size}")
+  public RespBody<String> handleGetUserAddresses(
+      @PathVariable(value = "page_number") BigInteger pageNumber,
+      @PathVariable(value = "page_size") BigInteger pageSize) {
+    RespBody<String> resp = new RespBody<>(SUCCESS);
+
+    Tuple2<List<String>, Boolean> result;
+    try {
+      result = contractConfig.userStorage().getAllUserAddresses(pageSize, pageNumber);
+    } catch (ContractException e) {
+      logger.warn("userStorage.getAllUserAddresses() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      resp.setData(e.getMessage());
+      return resp;
+    }
+
+    resp.setData(result.toString());
     return resp;
   }
 }

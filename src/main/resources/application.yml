@@ -6,15 +6,15 @@ logging:
 
 settings:
   MaxCidLen: 256
-  MaxNodeExtLen: 4096
-  MaxUserExtLen: 4096
-  MaxFileExtLen: 4096
-  MaxNodeCanAddFile: 1000000
-  MaxNodeCanDeleteFile: 1000000
-  Replica: 1
-  UserInitSpace: 5368709120
+  MaxNodeExtLen: 40960
+  MaxUserExtLen: 40960
+  MaxFileExtLen: 40960
+  MaxNodeCanAddFile: 100
+  MaxNodeCanDeleteFile: 100
+  Replica: 2
+  UserInitSpace: 300000000000
 
 
 GroupId: 1
 passwd: "123456"
-resolverAddress: "0x678c7f5af8a48a06f4e4076220e4ad9a013b20f7"
+resolverAddress: "0xa6bf6919c30bdc5ccec23e1b24d5e4952c3c3b62"

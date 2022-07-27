@@ -218,4 +218,27 @@ public class NodeController {
     resp.setData(result.toString());
     return resp;
   }
+
+  @GetMapping("get_node_can_delete_file_cid_hashes/{nodeAddress}")
+  public RespBody<List<String>> handleGetNodeCanDeleteFileCidHashes(
+      @PathVariable(value = "nodeAddress") String nodeAddress) {
+    RespBody<List<String>> resp = new RespBody<>(SUCCESS);
+
+    List cidHashes;
+    try {
+      cidHashes = contractConfig.nodeStorage().getNodeCanDeleteFileCidHashes(nodeAddress);
+    } catch (ContractException e) {
+      logger.warn("nodeStorage.getNodeCanDeleteFileCidHashes() exception:{}", e.toString());
+      resp.setResponseInfo(CALL_CONTRACT_FAILED);
+      return resp;
+    }
+
+    List<String> cidHashesString = new ArrayList<>(cidHashes.size());
+    for (int i = 0; i < cidHashes.size(); i++) {
+      cidHashesString.add("0x" + bytesToHexString((byte[]) cidHashes.get(i)));
+    }
+
+    resp.setData(cidHashesString);
+    return resp;
+  }
 }

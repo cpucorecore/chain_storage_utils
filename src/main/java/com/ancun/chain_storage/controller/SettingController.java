@@ -9,11 +9,10 @@ import com.ancun.chain_storage.config.KeyPairLoader;
 import com.ancun.chain_storage.constants.Response;
 import com.ancun.chain_storage.contracts.Setting;
 import java.math.BigInteger;
+import lombok.extern.slf4j.Slf4j;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.model.exception.ContractException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,11 +20,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequestMapping("/chain_storage/setting")
 public class SettingController {
-  private Logger logger = LoggerFactory.getLogger(SettingController.class);
-
   public static final String Replica = "Replica";
   public static final String InitSpace = "InitSpace";
   public static final String AdminAccount = "AdminAccount";
@@ -54,8 +52,13 @@ public class SettingController {
     TransactionReceipt receipt = null;
     BigInteger bigIntegerValue = BigInteger.ZERO;
     if (!AdminAccount.equals(key)) {
-      bigIntegerValue =
-          BigInteger.valueOf(Integer.valueOf(value).longValue()); // TODO check value valid
+      long lvalue;
+      try {
+        lvalue = Long.parseLong(value);
+      } catch (NumberFormatException e) {
+        return new RespBody<>(Response.INVALID_REQUEST, String.format("wrong value: [%s]", value));
+      }
+      bigIntegerValue = BigInteger.valueOf(lvalue);
     }
 
     switch (key) {
@@ -87,8 +90,8 @@ public class SettingController {
         receipt = setting.setMaxNodeCanDeleteFileCount(bigIntegerValue);
         break;
       default:
-        logger.error("unknown setting key:{}", key);
-        return new RespBody<>(UNKNOWN_SETTING_KEY, key);
+        log.error("unknown setting key:{}", key);
+        return new RespBody<>(UNKNOWN_SETTING_KEY, String.format("invalid key:[%s]", key));
     }
 
     return new RespBody<>(SUCCESS, receipt.toString());
@@ -130,8 +133,8 @@ public class SettingController {
           value = setting.getMaxNodeCanDeleteFileCount();
           break;
         default:
-          logger.error("unknown setting key:{}", key);
-          return new RespBody<>(UNKNOWN_SETTING_KEY, key);
+          log.error("unknown setting key:{}", key);
+          return new RespBody<>(UNKNOWN_SETTING_KEY, String.format("invalid key:[%s]", key));
       }
     } catch (ContractException e) {
       return new RespBody<>(CALL_CONTRACT_FAILED);
